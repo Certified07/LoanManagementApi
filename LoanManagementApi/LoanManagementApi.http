@@ -1,0 +1,6 @@
+@LoanManagementApi_HostAddress = http://localhost:5207
+
+GET {{LoanManagementApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
