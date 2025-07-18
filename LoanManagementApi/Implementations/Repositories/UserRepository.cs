@@ -1,39 +1,36 @@
-﻿using LoanManagementApi.Data;
+﻿using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Models.Entities;
-using LoanManagementApi.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace LoanManagementApi.Repositories.Implementations
+namespace LoanManagementApi.Implementations.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly LoanManagementContext _context;
+        private readonly MyContext _context;
 
-        public UserRepository(LoanManagementContext context)
+        public UserRepository(MyContext context)
         {
             _context = context;
         }
 
-        public async Task<User> CreateAsync(User user)
+        public async Task<MyUser> CreateAsync(MyUser user)
         {
-            user.Id = Guid.NewGuid();
-            user.CreatedAt = DateTime.UtcNow;
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;
         }
 
-        public async Task<User> GetByIdAsync(Guid id)
+        public async Task<MyUser> GetByIdAsync(Guid id)
         {
             return await _context.Users.FindAsync(id);
         }
 
-        public async Task<User> GetByUsernameAsync(string username)
+        public async Task<MyUser> GetByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
         }
 
-        public async Task<User> UpdateAsync(User user)
+        public async Task<MyUser> UpdateAsync(MyUser user)
         {
             var existingUser = await _context.Users.FindAsync(user.Id);
             if (existingUser == null)
@@ -41,7 +38,7 @@ namespace LoanManagementApi.Repositories.Implementations
                 return null;
             }
 
-            existingUser.Username = user.Username;
+            existingUser.UserName = user.UserName;
             existingUser.PasswordHash = user.PasswordHash;
             existingUser.Role = user.Role;
 
