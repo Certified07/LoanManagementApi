@@ -20,7 +20,7 @@ namespace LoanManagementApi.Implementations.Repositories
             return client;
         }
 
-        public async Task<Client> GetByIdAsync(Guid id)
+        public async Task<Client> GetByIdAsync(string id)
         {
             return await _context.Clients.FindAsync(id);
         }
@@ -50,7 +50,7 @@ namespace LoanManagementApi.Implementations.Repositories
             return existingClient;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(string id)
         {
             var client = await _context.Clients.FindAsync(id);
             if (client == null)
