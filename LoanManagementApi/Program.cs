@@ -1,6 +1,6 @@
 using LoanManagementApi.Data;
-using LoanManagementApi.Repositories.Implementations;
-using LoanManagementApi.Repositories.Interfaces;
+using LoanManagementApi.Implementations.Repositories;
+using LoanManagementApi.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

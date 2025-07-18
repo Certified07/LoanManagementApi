@@ -1,6 +1,6 @@
 ﻿using LoanManagementApi.Models.Entities;
 
-namespace LoanManagementApi.Repositories.Interfaces
+namespace LoanManagementApi.Interfaces.Repositories
 {
     public interface IRepaymentRepository
     {

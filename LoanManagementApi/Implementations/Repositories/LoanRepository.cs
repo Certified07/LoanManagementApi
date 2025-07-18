@@ -1,10 +1,10 @@
 ﻿using LoanManagementApi.Data;
+using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Models.Entities;
 using LoanManagementApi.Models.Enums;
-using LoanManagementApi.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace LoanManagementApi.Repositories.Implementations
+namespace LoanManagementApi.Implementations.Repositories
 {
     public class LoanRepository : ILoanRepository
     {

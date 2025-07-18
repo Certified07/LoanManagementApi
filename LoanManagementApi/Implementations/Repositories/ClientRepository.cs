@@ -1,24 +1,20 @@
-﻿using LoanManagementApi.Data;
+﻿using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Models.Entities;
-using LoanManagementApi.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace LoanManagementApi.Repositories.Implementations
+namespace LoanManagementApi.Implementations.Repositories
 {
     public class ClientRepository : IClientRepository
     {
-        private readonly LoanManagementContext _context;
+        private readonly MyContext _context;
 
-        public ClientRepository(LoanManagementContext context)
+        public ClientRepository(MyContext context)
         {
             _context = context;
         }
 
         public async Task<Client> CreateAsync(Client client)
         {
-            client.Id = Guid.NewGuid();
-            client.CreatedAt = DateTime.UtcNow;
-            client.UpdatedAt = DateTime.UtcNow;
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
             return client;

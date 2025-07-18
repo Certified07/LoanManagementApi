@@ -1,9 +1,9 @@
 ﻿using LoanManagementApi.Data;
+using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Models.Entities;
-using LoanManagementApi.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace LoanManagementApi.Repositories.Implementations
+namespace LoanManagementApi.Implementations.Repositories
 {
     public class RepaymentScheduleRepository : IRepaymentScheduleRepository
     {
