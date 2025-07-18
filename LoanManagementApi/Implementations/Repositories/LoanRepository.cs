@@ -1,5 +1,4 @@
-﻿using LoanManagementApi.Data;
-using LoanManagementApi.Interfaces.Repositories;
+﻿using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Models.Entities;
 using LoanManagementApi.Models.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -8,16 +7,16 @@ namespace LoanManagementApi.Implementations.Repositories
 {
     public class LoanRepository : ILoanRepository
     {
-        private readonly LoanManagementContext _context;
+        private readonly MyContext _context;
 
-        public LoanRepository(LoanManagementContext context)
+        public LoanRepository(MyContext context)
         {
             _context = context;
         }
 
         public async Task<Loan> CreateAsync(Loan loan)
         {
-            loan.Id = Guid.NewGuid();
+            loan.Id = Guid.NewGuid().ToString();
             loan.CreatedAt = DateTime.UtcNow;
             loan.UpdatedAt = DateTime.UtcNow;
             _context.Loans.Add(loan);
@@ -25,7 +24,7 @@ namespace LoanManagementApi.Implementations.Repositories
             return loan;
         }
 
-        public async Task<Loan> GetByIdAsync(Guid id)
+        public async Task<Loan> GetByIdAsync(string id)
         {
             return await _context.Loans.Include(l => l.Client).FirstOrDefaultAsync(l => l.Id == id);
         }
@@ -46,7 +45,7 @@ namespace LoanManagementApi.Implementations.Repositories
             existingLoan.ClientId = loan.ClientId;
             existingLoan.Amount = loan.Amount;
             existingLoan.InterestRate = loan.InterestRate;
-            existingLoan.TermMonths = loan.TermMonths;
+            existingLoan.DurationInMonths = loan.DurationInMonths;
             existingLoan.Status = loan.Status;
             existingLoan.ApplicationDate = loan.ApplicationDate;
             existingLoan.ApprovalDate = loan.ApprovalDate;
@@ -56,7 +55,7 @@ namespace LoanManagementApi.Implementations.Repositories
             return existingLoan;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(string id)
         {
             var loan = await _context.Loans.FindAsync(id);
             if (loan == null)
@@ -69,7 +68,7 @@ namespace LoanManagementApi.Implementations.Repositories
             return true;
         }
 
-        public async Task<List<Loan>> GetByClientIdAsync(Guid clientId)
+        public async Task<List<Loan>> GetByClientIdAsync(string clientId)
         {
             return await _context.Loans
                 .Include(l => l.Client)

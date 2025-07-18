@@ -2,6 +2,7 @@
 using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Interfaces.Services;
 using LoanManagementApi.Models.Entities;
+using LoanManagementApi.RequestModel;
 using LoanManagementApi.ResponseModel;
 
 namespace LoanManagementApi.Implementations.Services
@@ -87,9 +88,9 @@ namespace LoanManagementApi.Implementations.Services
             };
         }
 
-        public async Task<BaseResponse> CreateRuleAsync(decimal min, decimal max, int duration)
+        public async Task<BaseResponse> CreateRuleAsync(CreateRuleRequestModel model)
         {
-            var check = await _loanDurationRuleRepository.IsOverlappingRuleAsync(min, max);
+            var check = await _loanDurationRuleRepository.IsOverlappingRuleAsync(model.MinAmount, model.MaxAmount);
             if (check)
                 return new BaseResponse
                 {
@@ -99,9 +100,9 @@ namespace LoanManagementApi.Implementations.Services
 
             var rule = new LoanDurationRule
             {
-                MinAmount = min,
-                MaxAmount = max,
-                MaxDurationInMonths = duration
+                MinAmount = model.MinAmount,
+                MaxAmount = model.MaxAmount,
+                MaxDurationInMonths = model.MaxDurationInMonths
             };
 
             await _loanDurationRuleRepository.AddAsync(rule);
