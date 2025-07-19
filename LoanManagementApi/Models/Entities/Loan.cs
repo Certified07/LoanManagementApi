@@ -8,8 +8,9 @@ namespace LoanManagementApi.Models.Entities
         public string Id { get; set; }
         public string ClientId { get; set; }
         public Client Client { get; set; }
-        public decimal Amount { get; set; }
+        public decimal PrincipalAmount { get; set; }
         public decimal InterestRate { get; set; }
+        public decimal TotalAmountToRepay { get; set; }
         public int DurationInMonths { get; set; }
         public LoanStatus Status { get; set; }
         public DateTime ApplicationDate { get; set; }

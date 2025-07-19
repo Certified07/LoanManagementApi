@@ -13,12 +13,13 @@ namespace LoanManagementApi.Implementations.Services
         private readonly ILoanDurationRuleRepository _loanDurationRuleRepository;
         private readonly ILoanRepository _loanRepository;
         private readonly IClientRepository _clientRepository;
-
-        public LoanService(ILoanDurationRuleRepository loanDurationRuleRepository, ILoanRepository loanRepository, IClientRepository clientRepository)
+        private readonly IRepaymentService _repaymentService;
+        public LoanService(ILoanDurationRuleRepository loanDurationRuleRepository, ILoanRepository loanRepository, IClientRepository clientRepository, IRepaymentService repaymentService)
         {
             _loanDurationRuleRepository = loanDurationRuleRepository;
             _loanRepository = loanRepository;
             _clientRepository = clientRepository;
+            _repaymentService = repaymentService;
         }
         public async Task<BaseResponse> ApplyAsync(LoanRequestModel model)
         {
@@ -36,7 +37,15 @@ namespace LoanManagementApi.Implementations.Services
                     Message = "Client does not meet the credit score or income requirements",
                     Status = false
                 };
-
+            var existingLoans = await _loanRepository.GetByClientIdAsync(model.ClientId);
+            if (existingLoans.Any(l => l.Status == LoanStatus.Pending || l.Status == LoanStatus.Approved))
+            {
+                return new BaseResponse
+                {
+                    Message = "Client has an active or pending loan",
+                    Status = false
+                };
+            }
             var durationRule = await _loanDurationRuleRepository.FindByAmountAsync(model.Amount);
             if (durationRule == null)
                 return new BaseResponse
@@ -48,12 +57,15 @@ namespace LoanManagementApi.Implementations.Services
             var loan = new Loan
             {
                 Id = Guid.NewGuid().ToString(),
-                Amount = model.Amount,
+                PrincipalAmount = model.Amount,
+                InterestRate = 5M,
+                TotalAmountToRepay = model.Amount + (model.Amount * 5M / 100),
                 ClientId = model.ClientId,
                 Status = LoanStatus.Pending,
                 ApplicationDate = DateTime.Now,
-                DurationInMonths = durationRule.MaxDurationInMonths,
+                DurationInMonths = model.DurationInMonths
             };
+
 
             await _loanRepository.CreateAsync(loan);
             return new BaseResponse
@@ -83,6 +95,7 @@ namespace LoanManagementApi.Implementations.Services
             loan.ApprovalDate = DateTime.Now;
 
             await _loanRepository.UpdateAsync(loan);
+            await _repaymentService.GetRepaymentSummaryAsync(loanId);
             return new BaseResponse
             {
                 Message = "Loan approved successfully",
