@@ -2,6 +2,7 @@
 using LoanManagementApi.Models.Entities;
 using LoanManagementApi.Models.Enums;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 
 namespace LoanManagementApi.Implementations.Repositories
 {
@@ -26,7 +27,9 @@ namespace LoanManagementApi.Implementations.Repositories
 
         public async Task<Loan> GetByIdAsync(string id)
         {
-            return await _context.Loans.Include(l => l.Client).FirstOrDefaultAsync(l => l.Id == id);
+            return await _context.Loans.Include(x => x.Repayment)
+                                           .ThenInclude(x => x.RepaymentSchedules)
+                                           .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Loan>> GetAllAsync()
@@ -43,7 +46,6 @@ namespace LoanManagementApi.Implementations.Repositories
             }
 
             existingLoan.ClientId = loan.ClientId;
-            existingLoan.Amount = loan.Amount;
             existingLoan.InterestRate = loan.InterestRate;
             existingLoan.DurationInMonths = loan.DurationInMonths;
             existingLoan.Status = loan.Status;

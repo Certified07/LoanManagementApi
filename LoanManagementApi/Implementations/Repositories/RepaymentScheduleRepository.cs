@@ -1,5 +1,4 @@
-﻿using LoanManagementApi.Data;
-using LoanManagementApi.Interfaces.Repositories;
+﻿using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,30 +6,18 @@ namespace LoanManagementApi.Implementations.Repositories
 {
     public class RepaymentScheduleRepository : IRepaymentScheduleRepository
     {
-        private readonly LoanManagementContext _context;
+        private readonly MyContext _context;
 
-        public RepaymentScheduleRepository(LoanManagementContext context)
+        public RepaymentScheduleRepository(MyContext context)
         {
             _context = context;
         }
 
         public async Task<RepaymentSchedule> CreateAsync(RepaymentSchedule schedule)
         {
-            schedule.Id = Guid.NewGuid();
-            schedule.CreatedAt = DateTime.UtcNow;
             _context.RepaymentSchedules.Add(schedule);
             await _context.SaveChangesAsync();
             return schedule;
-        }
-
-        public async Task<List<RepaymentSchedule>> GetScheduleByLoanIdAsync(Guid loanId)
-        {
-            return await _context.RepaymentSchedules
-                .Include(rs => rs.Loan)
-                .ThenInclude(l => l.Client)
-                .Include(rs => rs.Repayment)
-                .Where(rs => rs.LoanId == loanId)
-                .ToListAsync();
         }
 
         public async Task<RepaymentSchedule> UpdateAsync(RepaymentSchedule schedule)
@@ -40,19 +27,24 @@ namespace LoanManagementApi.Implementations.Repositories
             {
                 return null;
             }
-
-            existingSchedule.LoanId = schedule.LoanId;
             existingSchedule.RepaymentId = schedule.RepaymentId;
-            existingSchedule.InstallmentNumber = schedule.InstallmentNumber;
             existingSchedule.DueDate = schedule.DueDate;
-            existingSchedule.AmountDue = schedule.AmountDue;
+            existingSchedule.Amount = schedule.Amount;
             existingSchedule.Status = schedule.Status;
+            existingSchedule.Penalty = schedule.Penalty;
+            existingSchedule.PaymentDate = schedule.PaymentDate;
 
             await _context.SaveChangesAsync();
             return existingSchedule;
         }
+        public async Task<RepaymentSchedule?> GetByIdAsync(string repaymentScheduleId)
+        {
+            return await _context.RepaymentSchedules.Include(x => x.Repayment)
+                                                             .ThenInclude(r => r.Loan)
+                                                             .FirstOrDefaultAsync(x => x.Id == repaymentScheduleId);
 
-        public async Task<bool> DeleteAsync(Guid id)
+        }
+        public async Task<bool> DeleteAsync(string id)
         {
             var schedule = await _context.RepaymentSchedules.FindAsync(id);
             if (schedule == null)

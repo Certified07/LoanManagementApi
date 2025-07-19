@@ -1,5 +1,4 @@
-﻿using LoanManagementApi.Data;
-using LoanManagementApi.Interfaces.Repositories;
+﻿using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,23 +6,23 @@ namespace LoanManagementApi.Implementations.Repositories
 {
     public class RepaymentRepository : IRepaymentRepository
     {
-        private readonly LoanManagementContext _context;
+        private readonly MyContext _context;
 
-        public RepaymentRepository(LoanManagementContext context)
+        public RepaymentRepository(MyContext context)
         {
             _context = context;
         }
 
         public async Task<Repayment> CreateAsync(Repayment repayment)
         {
-            repayment.Id = Guid.NewGuid();
+            repayment.Id = Guid.NewGuid().ToString();
             repayment.CreatedAt = DateTime.UtcNow;
             _context.Repayments.Add(repayment);
             await _context.SaveChangesAsync();
             return repayment;
         }
 
-        public async Task<Repayment> GetByIdAsync(Guid id)
+        public async Task<Repayment> GetByIdAsync(string id)
         {
             return await _context.Repayments
                 .Include(r => r.Loan)
@@ -32,7 +31,7 @@ namespace LoanManagementApi.Implementations.Repositories
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public async Task<List<Repayment>> GetHistoryByLoanIdAsync(Guid loanId)
+        public async Task<List<Repayment>> GetHistoryByLoanIdAsync(string loanId)
         {
             return await _context.Repayments
                 .Include(r => r.Loan)
@@ -40,6 +39,12 @@ namespace LoanManagementApi.Implementations.Repositories
                 .Include(r => r.RepaymentSchedules)
                 .Where(r => r.LoanId == loanId)
                 .ToListAsync();
+        }
+        public async Task<Repayment> GetByLoanId(string loanId)
+        {
+            return await _context.Repayments.Include(r => r.RepaymentSchedules)
+                                                      .FirstOrDefaultAsync(r => r.LoanId == loanId);
+
         }
 
         public async Task<Repayment> UpdateAsync(Repayment repayment)
@@ -60,7 +65,7 @@ namespace LoanManagementApi.Implementations.Repositories
             return existingRepayment;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(string id)
         {
             var repayment = await _context.Repayments.FindAsync(id);
             if (repayment == null)
