@@ -29,7 +29,10 @@ namespace LoanManagementApi.Implementations.Repositories
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
         }
-
+        public async Task<MyUser> GetByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
         public async Task<MyUser> UpdateAsync(MyUser user)
         {
             var existingUser = await _context.Users.FindAsync(user.Id);

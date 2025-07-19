@@ -4,6 +4,7 @@ namespace LoanManagementApi.Interfaces.Repositories
 {
     public interface IUserRepository
     {
+        Task<MyUser> GetByEmailAsync(string email);
         Task<MyUser> CreateAsync(MyUser user);
         Task<MyUser> GetByIdAsync(Guid id);
         Task<MyUser> GetByUsernameAsync(string username);
