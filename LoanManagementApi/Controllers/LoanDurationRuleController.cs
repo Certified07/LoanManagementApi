@@ -16,12 +16,7 @@ namespace LoanManagementApi.Controllers
             _loanDurationRuleService = loanDurationRuleService;
         }
 
-        /// <summary>
-        /// Retrieves all loan duration rules
-        /// </summary>
-        /// <returns>A list of all loan duration rules</returns>
-        /// <response code="200">Returns the list of rules</response>
-        /// <response code="404">No rules found</response>
+
         [HttpGet]
         public async Task<ActionResult<GetAllDurationRulesResponseModel>> GetAllRules()
         {
@@ -46,14 +41,7 @@ namespace LoanManagementApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Retrieves a loan duration rule by ID
-        /// </summary>
-        /// <param name="id">The unique identifier of the rule</param>
-        /// <returns>The loan duration rule with the specified ID</returns>
-        /// <response code="200">Returns the rule</response>
-        /// <response code="404">Rule not found</response>
-        /// <response code="400">Invalid ID format</response>
+
         [HttpGet("{id}")]
         public async Task<ActionResult<GetLoanDurationRuleResponseModel>> GetRuleById(string id)
         {
@@ -87,14 +75,7 @@ namespace LoanManagementApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Finds a loan duration rule by loan amount
-        /// </summary>
-        /// <param name="amount">The loan amount to search for</param>
-        /// <returns>The applicable loan duration rule for the specified amount</returns>
-        /// <response code="200">Returns the applicable rule</response>
-        /// <response code="404">No rule found for the specified amount</response>
-        /// <response code="400">Invalid amount</response>
+
         [HttpGet("by-amount/{amount:decimal}")]
         public async Task<ActionResult<GetLoanDurationRuleResponseModel>> FindRuleByAmount(decimal amount)
         {
@@ -128,14 +109,6 @@ namespace LoanManagementApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Creates a new loan duration rule
-        /// </summary>
-        /// <param name="model">The rule creation request containing min/max amounts and duration</param>
-        /// <returns>Success or failure response</returns>
-        /// <response code="201">Rule created successfully</response>
-        /// <response code="400">Invalid request data or overlapping rule exists</response>
-        /// <response code="422">Business rule violation</response>
         [HttpPost]
         public async Task<ActionResult<BaseResponse>> CreateRule([FromBody] CreateRuleRequestModel model)
         {
@@ -177,7 +150,7 @@ namespace LoanManagementApi.Controllers
 
                 return CreatedAtAction(
                     nameof(GetRuleById),
-                    new { id = "new" }, // You might want to return the actual ID if your service returns it
+                    new { id = "new" },
                     result
                 );
             }
