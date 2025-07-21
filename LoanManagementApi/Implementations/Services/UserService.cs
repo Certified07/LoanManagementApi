@@ -4,8 +4,6 @@ using LoanManagementApi.Models.Entities;
 using LoanManagementApi.Models.Enums;
 using LoanManagementApi.RequestModel;
 using LoanManagementApi.ResponseModel;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

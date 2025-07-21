@@ -5,7 +5,6 @@ using LoanManagementApi.Models.Entities;
 using LoanManagementApi.Models.Enums;
 using LoanManagementApi.RequestModel;
 using LoanManagementApi.ResponseModel;
-using Nest;
 
 namespace LoanManagementApi.Implementations.Services
 {

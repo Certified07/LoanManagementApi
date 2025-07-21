@@ -2,7 +2,6 @@
 using LoanManagementApi.Models.Entities;
 using LoanManagementApi.Models.Enums;
 using Microsoft.EntityFrameworkCore;
-using Nest;
 
 namespace LoanManagementApi.Implementations.Repositories
 {
