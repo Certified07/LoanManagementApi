@@ -6,6 +6,9 @@ using LoanManagementApi.RequestModel;
 using LoanManagementApi.ResponseModel;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -15,13 +18,13 @@ namespace LoanManagementApi.Implementations.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IClientRepository _clientRepository;
+        private readonly IConfiguration _config;
 
-        private readonly SignInManager<MyUser> _signInManager;
-        public UserService(IUserRepository userRepository, IClientRepository clientRepository, SignInManager<MyUser> signInManager)
+        public UserService(IUserRepository userRepository, IClientRepository clientRepository, IConfiguration config)
         {
             _userRepository = userRepository;
             _clientRepository = clientRepository;
-            _signInManager = signInManager;
+            _config = config;
         }
         public async Task<BaseResponse> RegisterAsync(RegisterUserRequestModel model)
         {
@@ -76,12 +79,12 @@ namespace LoanManagementApi.Implementations.Services
                 Status = true
             };
         }
-        public async Task<BaseResponse> LoginUser(LoginUserRequestModel model)
+        public async Task<LoginResponseModel> LoginUser(LoginUserRequestModel model)
         {
             var user = await _userRepository.GetByEmailAsync(model.Email);
             if (user == null)
             {
-                return new BaseResponse
+                return new LoginResponseModel
                 {
                     Message = "User not found",
                     Status = false
@@ -89,20 +92,40 @@ namespace LoanManagementApi.Implementations.Services
             }
             if (user.PasswordHash != HashPassword(model.Password))
             {
-                return new BaseResponse
+                return new LoginResponseModel
                 {
                     Message = "Invalid password",
                     Status = false
                 };
             }
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            user.IsLoggedIn = true;
-            await _userRepository.UpdateAsync(user);
-            return new BaseResponse
+            var token = GenerateToken(user);
+            return new LoginResponseModel
             {
+                Token = token,
                 Message = "Sucessfully logged in",
                 Status = true
             };
+        }
+        public string GenerateToken(MyUser user)
+        {
+            var claims = new[]
+            {
+            new Claim(ClaimTypes.Name, user.Id),
+            new Claim(ClaimTypes.Email, user.Email)
+        };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddHours(2),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
         public static string HashPassword(string plainText)
         {
