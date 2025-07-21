@@ -6,7 +6,7 @@ namespace LoanManagementApi.Interfaces.Services
     public interface IUserService
     {
         static abstract string HashPassword(string plainText);
-        Task<BaseResponse> LoginUser(LoginUserRequestModel model);
+        Task<LoginResponseModel> LoginUser(LoginUserRequestModel model);
         Task<BaseResponse> RegisterAsync(RegisterUserRequestModel model);
     }
 }
