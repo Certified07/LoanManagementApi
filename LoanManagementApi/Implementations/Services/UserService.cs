@@ -45,6 +45,7 @@ namespace LoanManagementApi.Implementations.Services
                     Message = "Email already exist",
                     Status = false
                 };
+
             }
             if (model.Age < 18)
             {
@@ -111,7 +112,8 @@ namespace LoanManagementApi.Implementations.Services
             var claims = new[]
             {
             new Claim(ClaimTypes.Name, user.Id),
-            new Claim(ClaimTypes.Email, user.Email)
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role.ToString())
         };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
