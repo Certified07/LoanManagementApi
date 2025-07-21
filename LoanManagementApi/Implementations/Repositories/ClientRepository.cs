@@ -38,13 +38,11 @@ namespace LoanManagementApi.Implementations.Repositories
                 return null;
             }
 
-            existingClient.FirstName = client.FirstName;
-            existingClient.LastName = client.LastName;
+            existingClient.Name = client.Name;
             existingClient.Email = client.Email;
             existingClient.Phone = client.Phone;
             existingClient.CreditScore = client.CreditScore;
             existingClient.Income = client.Income;
-            existingClient.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return existingClient;
