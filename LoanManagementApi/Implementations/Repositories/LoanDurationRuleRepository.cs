@@ -1,6 +1,6 @@
 ﻿using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Models.Entities;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace LoanManagementApi.Implementations.Repositories
 {
