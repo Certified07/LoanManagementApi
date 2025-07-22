@@ -18,7 +18,6 @@ namespace LoanManagementApi.Implementations.Repositories
         {
             loan.Id = Guid.NewGuid().ToString();
             loan.CreatedAt = DateTime.UtcNow;
-            loan.UpdatedAt = DateTime.UtcNow;
             _context.Loans.Add(loan);
             await _context.SaveChangesAsync();
             return loan;

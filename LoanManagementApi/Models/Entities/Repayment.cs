@@ -12,7 +12,8 @@ namespace LoanManagementApi.Models.Entities
         public string LoanId { get; set; }
         public Loan Loan { get; set; }
 
-        public decimal Amount { get; set; }
+        public decimal TotalAmount { get; set; }
+        public decimal AmountPaid {  get; set; }
 
         public DateTime PaymentDate { get; set; }
 

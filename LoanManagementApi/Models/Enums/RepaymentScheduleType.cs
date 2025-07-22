@@ -1,6 +1,6 @@
 ﻿namespace LoanManagementApi.Models.Enums
 {
-    public enum RepaymentScheduleType
+    public enum RepaymentType
     {
         Fixed = 1,
         Flexible = 2

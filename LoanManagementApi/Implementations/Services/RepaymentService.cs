@@ -20,7 +20,7 @@ namespace LoanManagementApi.Implementations.Services
             _repaymentRepository = repaymentRepository;
             _repaymentScheduleRepository = repaymentScheduleRepository;
         }
-        public async Task<BaseResponse> GenerateRepaymentScheduleAsync(string loanId, int durationInMonths)
+        public async Task<BaseResponse> GenerateFixedRepaymentScheduleAsync(string loanId, int durationInMonths)
         {
             var loan = await _loanRepository.GetByIdAsync(loanId);
             if (loan == null)
@@ -43,7 +43,7 @@ namespace LoanManagementApi.Implementations.Services
             {
                 Id = Guid.NewGuid().ToString(),
                 LoanId = loan.Id,
-                Amount = monthlyPayment * durationInMonths,
+                TotalAmount = monthlyPayment * durationInMonths,
                 CreatedAt = DateTime.UtcNow,
                 Status = PaymentStatus.Pending
             };
@@ -72,45 +72,90 @@ namespace LoanManagementApi.Implementations.Services
             };
 
         }
-        public async Task<BaseResponse> MakeRepaymentAsync(MakeRepaymentRequestModel model)
+        public async Task<RepaymentSchedule> GenerateFlexibleRepaymentSchedule(Loan loan)
         {
-            var schedule = await _repaymentScheduleRepository.GetByIdAsync(model.ScheduleId);
-            if (schedule == null)
+            var repayment = new Repayment
             {
-                return new BaseResponse
-                {
-                    Message = "Repayment schedule not found",
-                    Status = false
-                };
-            }
-            if (schedule.IsPaid)
-                return new BaseResponse
-                {
-                    Message = "Repayment schedule already paid",
-                    Status = false
-                };
-            ApplyPenalty(schedule);
-            decimal totalDue = schedule.Amount + schedule.Penalty;
-            schedule.AmountPaid += model.Amount;
+                Id = Guid.NewGuid().ToString(),
+                LoanId = loan.Id,
+                TotalAmount = loan.TotalAmountToRepay, 
+                AmountPaid = 0,
+                PaymentDate = loan.CreatedAt.AddMonths(loan.DurationInMonths),
+                Status = PaymentStatus.Pending
+            };
 
-            if (schedule.AmountPaid >= totalDue && schedule.Penalty == 0)
+            await _repaymentRepository.CreateAsync(repayment);
+
+            var schedule = new RepaymentSchedule
             {
-                schedule.Status = PaymentStatus.OnTime;
-                schedule.PaymentDate = DateTime.UtcNow;
-            }
-            else if (schedule.AmountPaid >= totalDue && schedule.Penalty > 0)
+                Id = Guid.NewGuid().ToString(),
+                RepaymentId = repayment.Id,
+                DueDate = repayment.PaymentDate,
+                Amount = repayment.TotalAmount,
+                Status = PaymentStatus.Pending
+            };
+
+            await _repaymentScheduleRepository.CreateAsync(schedule);
+
+            return schedule;
+        }
+        public async Task<BaseResponse> MakePaymentAsync(string loanId, decimal amount)
+        {
+            var loan = await _loanRepository.GetByIdAsync(loanId);
+            if (loan == null || loan.Repayment == null)
+                return new BaseResponse { Message = "Loan not found or no repayment scheduled", Status = false };
+
+            var repayment = loan.Repayment;
+
+            if (loan.RepaymentType == RepaymentType.Flexible)
             {
-                schedule.Status = PaymentStatus.Overdue;
-                schedule.PaymentDate = DateTime.UtcNow;
+                var schedule = repayment.RepaymentSchedules.First();
+                schedule.AmountPaid += amount;
+                var amountLeft = schedule.Amount - schedule.AmountPaid;
+                if (amountLeft<amount)
+                {
+                    return new BaseResponse
+                    {
+                        Message = $"You just have {amountLeft} to pay",
+                        Status = false
+                    };
+                }
+                repayment.AmountPaid += amount;
+                if (schedule.AmountPaid == schedule.Amount)
+                    schedule.Status = PaymentStatus.Paid;
+
+                if (repayment.AmountPaid == repayment.TotalAmount)
+                    repayment.Status = PaymentStatus.Paid;
+
+                await _repaymentScheduleRepository.UpdateAsync(schedule);
+                await _repaymentRepository.UpdateAsync(repayment);
             }
             else
             {
-                schedule.Status = PaymentStatus.PartiallyPaid;
+                var nextSchedule = repayment.RepaymentSchedules
+                    .OrderBy(s => s.DueDate)
+                    .FirstOrDefault(s => s.Status == PaymentStatus.Pending);
+
+                if (nextSchedule == null)
+                    return new BaseResponse { Message = "All schedules already paid", Status = false };
+                ApplyPenalty(nextSchedule);
+                if (amount < nextSchedule.Amount)
+                    return new BaseResponse { Message = "Payment amount is less than expected installment", Status = false };
+                
+                nextSchedule.Status = PaymentStatus.Paid;
+                nextSchedule.AmountPaid = nextSchedule.Amount;
+                repayment.AmountPaid += nextSchedule.Amount;
+
+                if (repayment.AmountPaid >= repayment.TotalAmount)
+                    repayment.Status = PaymentStatus.Paid;
+
+                await _repaymentScheduleRepository.UpdateAsync(nextSchedule);
+                await _repaymentRepository.UpdateAsync(repayment);
             }
-            await _repaymentScheduleRepository.UpdateAsync(schedule);
+
             return new BaseResponse
             {
-                Message = "Payment sucessfully made",
+                Message = "Payment successful",
                 Status = true
             };
         }

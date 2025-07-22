@@ -9,6 +9,7 @@
         public decimal MaxAmount { get; set; }
 
         public int MaxDurationInMonths { get; set; }
+        public RepaymentSchedule RepaymentSchedule { get; set; }
 
         public ICollection<Loan> Loans { get; set; } = [];
     }

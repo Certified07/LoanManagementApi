@@ -45,7 +45,9 @@ namespace LoanManagementApi.Implementations.Services
                 };
 
             }
-            if (model.Age < 18)
+            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            var age = currentDate.Year - model.DateOfBirth.Year;
+            if (age < 18)
             {
                 return new BaseResponse
                 {
