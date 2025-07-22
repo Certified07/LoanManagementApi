@@ -1,4 +1,5 @@
-﻿using LoanManagementApi.Implementations.Repositories;
+﻿using LoanManagementApi.DTOs;
+using LoanManagementApi.Implementations.Repositories;
 using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Interfaces.Services;
 using LoanManagementApi.Models.Entities;
@@ -21,7 +22,7 @@ namespace LoanManagementApi.Implementations.Services
             _repaymentService = repaymentService;
             _loanTypeRepository = loanTypeRepository;
         }
-        public async Task<BaseResponse>     ApplyAsync(LoanRequestModel model)
+        public async Task<BaseResponse> ApplyAsync(LoanRequestModel model)
         {
             var client = await _clientRepository.GetByIdAsync(model.ClientId);
             if (client == null)
@@ -89,7 +90,16 @@ namespace LoanManagementApi.Implementations.Services
 
             loan.Status = LoanStatus.Approved;
             loan.ApprovalDate = DateTime.Now;
-
+            if (loan.RepaymentType == RepaymentType.Flexible)
+            {
+                await _repaymentService.GenerateFlexibleRepaymentSchedule(loan);
+                loan.Status = LoanStatus.Active;
+            }
+            else
+            {
+                await _repaymentService.GenerateFixedRepaymentScheduleAsync(loan.Id, loan.DurationInMonths);
+                loan.Status = LoanStatus.Active;
+            }
             await _loanRepository.UpdateAsync(loan);
             await _repaymentService.GetRepaymentSummaryAsync(loanId);
             return new BaseResponse
@@ -124,39 +134,84 @@ namespace LoanManagementApi.Implementations.Services
                 Status = true
             };
         }
-        private void AdjustCreditScore(Client client, int change)
+        public async Task<LoansResponseModel> GetDefaultedLoans()
         {
-            client.CreditScore += change;
-            if (client.CreditScore < 0) client.CreditScore = 0;
-            if (client.CreditScore > 850) client.CreditScore = 850;
-        }
-        public async Task<BaseResponse> UpdateCreditScoreOnRepayment(string loanId, bool isDefaulted)
-        {
-            var loan = await _loanRepository.GetByIdAsync(loanId);
-            if (loan == null)
-                return new BaseResponse
-                {
-                    Message = "Loan not found",
-                    Status = false
-                };
-
-            var client = await _clientRepository.GetByIdAsync(loan.ClientId);
-            if (client == null)
-                return new BaseResponse
-                {
-                    Message = "Client not found",
-                    Status = false
-                };
-
-            if (isDefaulted)
-                AdjustCreditScore(client, -40);
-            else
-                AdjustCreditScore(client, 30);
-
-            await _clientRepository.UpdateAsync(client);
-            return new BaseResponse
+            var response = await _loanRepository.GetDefaultsAsync();
+            if(response.Count() == 0)
             {
-                Message = "Credit score updated successfully",
+                return new LoansResponseModel
+                {
+                    Message = "No defaulted loans",
+                    Status = false
+                };
+            }
+            return new LoansResponseModel
+            {
+                Data = response.Select(x => new LoanDTO
+                {
+                    Id = x.Id,
+                    Amount = x.TotalAmountToRepay,
+                    Balance = x.TotalAmountToRepay - x.TotalPaid,
+                    Status = x.Status.ToString(),
+                    ApprovedAt = x.ApprovalDate.Value,
+                    DueDate = x.ApprovalDate.Value.AddMonths(x.DurationInMonths)
+
+                }).ToList(),
+                Message = "Sucessfully returned",
+                Status = true
+            };
+        }
+        public async Task<LoansResponseModel> GetOutstandingLoans()
+        {
+            var response = await _loanRepository.GetOutstandingAsync();
+            if (response.Count() == 0)
+            {
+                return new LoansResponseModel
+                {
+                    Message = "No outstanding loans",
+                    Status = false
+                };
+            }
+            return new LoansResponseModel
+            {
+                Data = response.Select(x => new LoanDTO
+                {
+                    Id = x.Id,
+                    Amount = x.TotalAmountToRepay,
+                    Balance = x.TotalAmountToRepay - x.TotalPaid,
+                    Status = x.Status.ToString(),
+                    ApprovedAt = x.ApprovalDate.Value,
+                    DueDate = x.ApprovalDate.Value.AddMonths(x.DurationInMonths)
+
+                }).ToList(),
+                Message = "Sucessfully returned",
+                Status = true
+            };
+        }
+        public async Task<LoansResponseModel> GetPaidLoans()
+        {
+            var response = await _loanRepository.GetPaidAsync();
+            if (response.Count() == 0)
+            {
+                return new LoansResponseModel
+                {
+                    Message = "No paid loans",
+                    Status = false
+                };
+            }
+            return new LoansResponseModel
+            {
+                Data = response.Select(x => new LoanDTO
+                {
+                    Id = x.Id,
+                    Amount = x.TotalAmountToRepay,
+                    Balance = x.TotalAmountToRepay - x.TotalPaid,
+                    Status = x.Status.ToString(),
+                    ApprovedAt = x.ApprovalDate.Value,
+                    DueDate = x.ApprovalDate.Value.AddMonths(x.DurationInMonths)
+
+                }).ToList(),
+                Message = "Sucessfully returned",
                 Status = true
             };
         }

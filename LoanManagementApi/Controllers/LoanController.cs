@@ -1,5 +1,7 @@
-﻿using LoanManagementApi.Interfaces.Services;
+﻿using LoanManagementApi.Implementations.Services;
+using LoanManagementApi.Interfaces.Services;
 using LoanManagementApi.RequestModel;
+using LoanManagementApi.ResponseModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +12,11 @@ namespace LoanManagementApi.Controllers
     public class LoanController : ControllerBase
     {
         private readonly ILoanService _loanService;
-
-        public LoanController(ILoanService loanService)
+        private readonly IRepaymentService _repaymentService;
+        public LoanController(ILoanService loanService, IRepaymentService repaymentService)
         {
             _loanService = loanService;
+            _repaymentService = repaymentService;
         }
 
         [HttpPost("apply")]
@@ -123,5 +126,40 @@ namespace LoanManagementApi.Controllers
                 });
             }
         }
+
+        [HttpGet("defaults")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetDefaultedLoans()
+        {
+            var result = await _loanService.GetDefaultedLoans();
+            return Ok(result);
+        }
+
+        [HttpGet("paid")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetPaidLoans()
+        {
+            var result = await _loanService.GetPaidLoans();
+            return Ok(result);
+        }
+
+        [HttpGet("outstanding")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetOutstandingLoans()
+        {
+            var result = await _loanService.GetOutstandingLoans();
+            return Ok(result);
+        }
+        [HttpPost("pay")]
+        public async Task<IActionResult> MakeRepayment([FromBody] MakeRepaymentRequestModel request)
+        {
+            var result = await _repaymentService.MakePaymentAsync(request);
+
+            if (!result.Status)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
     }
+
 }
