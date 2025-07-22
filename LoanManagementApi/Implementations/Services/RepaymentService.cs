@@ -80,7 +80,7 @@ namespace LoanManagementApi.Implementations.Services
                 LoanId = loan.Id,
                 TotalAmount = loan.TotalAmountToRepay, 
                 AmountPaid = 0,
-                PaymentDate = loan.CreatedAt.AddMonths(loan.DurationInMonths),
+                PaymentDate = loan.ApprovalDate.Value.AddMonths(loan.DurationInMonths),
                 Status = PaymentStatus.Pending
             };
 

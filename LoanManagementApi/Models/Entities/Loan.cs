@@ -15,9 +15,8 @@ namespace LoanManagementApi.Models.Entities
         public LoanStatus Status { get; set; }
         public DateTime ApplicationDate { get; set; }
         public DateTime? ApprovalDate { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public Repayment Repayment { get; set; }
-        public decimal TotalPaid { get; set; }
+        public Repayment? Repayment { get; set; }
+        public decimal TotalPaid { get; set; } = 0;
         public bool IsCompleted { get; set; }
         public RepaymentType RepaymentType { get; set; }
         public int LoanTypeId { get; set; }

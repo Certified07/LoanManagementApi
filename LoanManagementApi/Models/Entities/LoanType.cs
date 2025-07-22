@@ -1,4 +1,6 @@
-﻿namespace LoanManagementApi.Models.Entities
+﻿using LoanManagementApi.Models.Enums;
+
+namespace LoanManagementApi.Models.Entities
 {
     public class LoanType
     {
@@ -9,7 +11,7 @@
         public decimal MaxAmount { get; set; }
 
         public int MaxDurationInMonths { get; set; }
-        public RepaymentSchedule RepaymentSchedule { get; set; }
+        public RepaymentType RepaymentType { get; set; }
 
         public ICollection<Loan> Loans { get; set; } = [];
     }
