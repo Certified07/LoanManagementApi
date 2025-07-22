@@ -26,9 +26,6 @@ namespace LoanManagementApi.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<int>("CreditScore")
                         .HasColumnType("int");
 
@@ -36,23 +33,16 @@ namespace LoanManagementApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<decimal>("Income")
                         .HasColumnType("decimal(65,30)");
 
-                    b.Property<string>("LastName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -83,8 +73,14 @@ namespace LoanManagementApi.Migrations
                     b.Property<decimal>("InterestRate")
                         .HasColumnType("decimal(65,30)");
 
+                    b.Property<int>("LoanTypeId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("PrincipalAmount")
                         .HasColumnType("decimal(65,30)");
+
+                    b.Property<int>("RepaymentSchedule")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -99,13 +95,18 @@ namespace LoanManagementApi.Migrations
 
                     b.HasIndex("ClientId");
 
+                    b.HasIndex("LoanTypeId");
+
                     b.ToTable("Loans");
                 });
 
-            modelBuilder.Entity("LoanManagementApi.Models.Entities.LoanDurationRule", b =>
+            modelBuilder.Entity("LoanManagementApi.Models.Entities.LoanType", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("varchar(255)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("MaxAmount")
                         .HasColumnType("decimal(65,30)");
@@ -113,12 +114,13 @@ namespace LoanManagementApi.Migrations
                     b.Property<int>("MaxDurationInMonths")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("MinAmount")
-                        .HasColumnType("decimal(65,30)");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
-                    b.ToTable("LoanDurationRules");
+                    b.ToTable("LoanTypes");
                 });
 
             modelBuilder.Entity("LoanManagementApi.Models.Entities.MyUser", b =>
@@ -186,6 +188,24 @@ namespace LoanManagementApi.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "82b5947e-b56d-4662-90a7-39cdcd542e18",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "83095f9f-6647-4746-9499-cccf144d8125",
+                            Email = "admin@gmail.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@GMAIL.COM",
+                            PasswordHash = "c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec",
+                            PhoneNumberConfirmed = false,
+                            Role = 0,
+                            SecurityStamp = "08c220f0-91a7-45a5-83f2-bd7386783787",
+                            TwoFactorEnabled = false,
+                            UserName = "Admin"
+                        });
                 });
 
             modelBuilder.Entity("LoanManagementApi.Models.Entities.Repayment", b =>
@@ -281,6 +301,18 @@ namespace LoanManagementApi.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "44e36a50-0091-4f8f-84c6-e932cd9c4df2",
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = "91f8dcdf-e48c-4ad2-8153-d6d787f71e74",
+                            Name = "Client"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -368,6 +400,13 @@ namespace LoanManagementApi.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "82b5947e-b56d-4662-90a7-39cdcd542e18",
+                            RoleId = "44e36a50-0091-4f8f-84c6-e932cd9c4df2"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -397,7 +436,15 @@ namespace LoanManagementApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("LoanManagementApi.Models.Entities.LoanType", "LoanType")
+                        .WithMany("Loans")
+                        .HasForeignKey("LoanTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Client");
+
+                    b.Navigation("LoanType");
                 });
 
             modelBuilder.Entity("LoanManagementApi.Models.Entities.Repayment", b =>
@@ -477,6 +524,11 @@ namespace LoanManagementApi.Migrations
                 {
                     b.Navigation("Repayment")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("LoanManagementApi.Models.Entities.LoanType", b =>
+                {
+                    b.Navigation("Loans");
                 });
 
             modelBuilder.Entity("LoanManagementApi.Models.Entities.Repayment", b =>

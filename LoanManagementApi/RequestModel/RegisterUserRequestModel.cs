@@ -12,7 +12,7 @@ namespace LoanManagementApi.RequestModel
         public string Email { get; set; }
 
         [Required]
-        [RegularExpression(@"^[a-zA-Z0-9]{6,}$", ErrorMessage = "Password must be at least 6 alphanumeric characters")]
+        //[RegularExpression(@"^[a-zA-Z0-9]{6,}$", ErrorMessage = "Password must be at least 6 alphanumeric characters")]
         public string Password { get; set; }
         public int Age { get; set; }
         public decimal Income { get; set; }

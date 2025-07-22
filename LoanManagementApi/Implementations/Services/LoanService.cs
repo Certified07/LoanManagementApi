@@ -21,7 +21,7 @@ namespace LoanManagementApi.Implementations.Services
             _repaymentService = repaymentService;
             _loanTypeRepository = loanTypeRepository;
         }
-        public async Task<BaseResponse> ApplyAsync(LoanRequestModel model)
+        public async Task<BaseResponse>     ApplyAsync(LoanRequestModel model)
         {
             var client = await _clientRepository.GetByIdAsync(model.ClientId);
             if (client == null)
@@ -34,7 +34,7 @@ namespace LoanManagementApi.Implementations.Services
             
             var existingLoans = await _loanRepository.GetByClientIdAsync(model.ClientId);
             var amountLoaned = existingLoans.Sum(x => x.PrincipalAmount);
-            var maximumLoan = ((client.CreditScore / 1000) * (client.Income)) - amountLoaned;
+            var maximumLoan = ((client.CreditScore / 100) * (client.Income)) - amountLoaned;
             var allowedAmount = Math.Min(maximumLoan, loantype.MaxAmount);
 
             if (model.Amount > allowedAmount)
