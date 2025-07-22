@@ -1,4 +1,5 @@
-﻿using LoanManagementApi.RequestModel;
+﻿using LoanManagementApi.Models.Entities;
+using LoanManagementApi.RequestModel;
 using LoanManagementApi.ResponseModel;
 
 namespace LoanManagementApi.Interfaces.Services
@@ -7,6 +8,7 @@ namespace LoanManagementApi.Interfaces.Services
     {
         Task<BaseResponse> GenerateFixedRepaymentScheduleAsync(string loanId, int durationInMonths);
         Task<RepaymentScheduleResponseModel> GetRepaymentSummaryAsync(string loanId);
-        Task<BaseResponse> MakePaymentAsync(string loanId, decimal amount);
+        Task<BaseResponse> MakePaymentAsync(MakeRepaymentRequestModel model);
+        Task<RepaymentSchedule> GenerateFlexibleRepaymentSchedule(Loan loan);
     }
 }

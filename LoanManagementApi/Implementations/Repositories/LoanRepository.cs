@@ -93,7 +93,7 @@ namespace LoanManagementApi.Implementations.Repositories
         {
             return await _context.Loans
                 .Include(l => l.Client)
-                .Where(l => l.Status == LoanStatus.Active || l.Status == LoanStatus.Approved)
+                .Where(l => l.Status == LoanStatus.Active)
                 .ToListAsync();
         }
     }

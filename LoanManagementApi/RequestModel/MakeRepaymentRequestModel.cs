@@ -2,7 +2,7 @@
 {
     public class MakeRepaymentRequestModel
     {
-        public string ScheduleId { get; set; }
+        public string loanId { get; set; }
         public decimal Amount { get; set; }
     }
 }
