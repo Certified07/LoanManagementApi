@@ -205,6 +205,44 @@ namespace LoanManagementApi.Implementations.Services
             };
 
         }
+        public async Task<List<RepaymentResponseModel>> GetHistoryByLoanIdAsync(string loanId)
+        {
+            var repayments = await _repaymentRepository.GetHistoryByLoanIdAsync(loanId);
+
+            if (repayments == null || !repayments.Any())
+            {
+                return new List<RepaymentResponseModel>();
+            }
+
+            foreach (var repayment in repayments)
+            {
+                foreach (var schedule in repayment.RepaymentSchedules)
+                {
+                    ApplyPenalty(schedule);
+                    await _repaymentScheduleRepository.UpdateAsync(schedule);
+                }
+            }
+
+            return repayments.Select(r => new RepaymentResponseModel
+            {
+                RepaymentId = r.Id,
+                LoanId = r.LoanId,
+                TotalAmount = r.TotalAmount,
+                AmountPaid = r.AmountPaid,
+                Status = r.Status.ToString(),
+                CreatedAt = r.CreatedAt,
+                PaymentDate = r.PaymentDate,
+                Schedules = r.RepaymentSchedules.Select(s => new RepaymentScheduleDTO
+                {
+                    ScheduleId = s.Id,
+                    DueDate = s.DueDate.ToString("yyyy-MM-dd"),
+                    Amount = s.Amount,
+                    Penalty = s.Penalty,
+                    AmountPaid = s.AmountPaid,
+                    Status = s.Status.ToString()
+                }).ToList()
+            }).ToList();
+        }
 
     }
 }

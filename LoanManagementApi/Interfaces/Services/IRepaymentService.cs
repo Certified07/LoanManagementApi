@@ -8,7 +8,9 @@ namespace LoanManagementApi.Interfaces.Services
     {
         Task<BaseResponse> GenerateFixedRepaymentScheduleAsync(string loanId, int durationInMonths);
         Task<RepaymentScheduleResponseModel> GetRepaymentSummaryAsync(string loanId);
+
         Task<BaseResponse> MakePaymentAsync(MakeRepaymentRequestModel model);
         Task<RepaymentSchedule> GenerateFlexibleRepaymentSchedule(Loan loan);
+
     }
 }
