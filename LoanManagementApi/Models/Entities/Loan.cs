@@ -16,11 +16,12 @@ namespace LoanManagementApi.Models.Entities
         public DateTime ApplicationDate { get; set; }
         public DateTime? ApprovalDate { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
         public Repayment Repayment { get; set; }
+        public decimal TotalPaid { get; set; }
+        public bool IsCompleted { get; set; }
+        public RepaymentType RepaymentType { get; set; }
         public int LoanTypeId { get; set; }
         public LoanType LoanType { get; set; }
-        public RepaymentScheduleType RepaymentSchedule { get; set; }
 
     }
 }

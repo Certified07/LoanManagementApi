@@ -10,5 +10,6 @@ namespace LoanManagementApi.Models.Entities
         public string Phone { get; set; }
         public int CreditScore { get; set; }
         public decimal Income { get; set; }
+        public DateOnly DateOfBirth { get; set; }
     }
 }
