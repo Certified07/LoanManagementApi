@@ -16,8 +16,6 @@ namespace LoanManagementApi.Implementations.Repositories
 
         public async Task<Loan> CreateAsync(Loan loan)
         {
-            loan.Id = Guid.NewGuid().ToString();
-            loan.CreatedAt = DateTime.UtcNow;
             _context.Loans.Add(loan);
             await _context.SaveChangesAsync();
             return loan;
@@ -49,7 +47,6 @@ namespace LoanManagementApi.Implementations.Repositories
             existingLoan.Status = loan.Status;
             existingLoan.ApplicationDate = loan.ApplicationDate;
             existingLoan.ApprovalDate = loan.ApprovalDate;
-            existingLoan.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return existingLoan;

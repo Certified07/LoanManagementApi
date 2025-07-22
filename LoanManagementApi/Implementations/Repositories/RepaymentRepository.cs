@@ -56,7 +56,7 @@ namespace LoanManagementApi.Implementations.Repositories
             }
 
             existingRepayment.LoanId = repayment.LoanId;
-            existingRepayment.Amount = repayment.Amount;
+            existingRepayment.TotalAmount = repayment.TotalAmount;
             existingRepayment.PaymentDate = repayment.PaymentDate;
             existingRepayment.Status = repayment.Status;
             existingRepayment.Penalty = repayment.Penalty;

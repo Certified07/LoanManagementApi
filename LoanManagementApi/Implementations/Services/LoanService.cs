@@ -34,7 +34,8 @@ namespace LoanManagementApi.Implementations.Services
             
             var existingLoans = await _loanRepository.GetByClientIdAsync(model.ClientId);
             var amountLoaned = existingLoans.Sum(x => x.PrincipalAmount);
-            var maximumLoan = ((client.CreditScore / 100) * (client.Income)) - amountLoaned;
+            var maximumLoan = ((client.CreditScore / 100.0M) * client.Income) - amountLoaned;
+
             var allowedAmount = Math.Min(maximumLoan, loantype.MaxAmount);
 
             if (model.Amount > allowedAmount)
@@ -55,7 +56,10 @@ namespace LoanManagementApi.Implementations.Services
                 ClientId = model.ClientId,
                 Status = LoanStatus.Pending,
                 ApplicationDate = DateTime.Now,
-                DurationInMonths = model.DurationInMonths
+                DurationInMonths = model.DurationInMonths,
+                LoanTypeId = model.LoanId,
+                IsCompleted = false,
+                RepaymentType = loantype.RepaymentType
             };
 
 

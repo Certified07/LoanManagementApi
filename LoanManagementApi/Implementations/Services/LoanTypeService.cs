@@ -2,6 +2,7 @@
 using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Interfaces.Services;
 using LoanManagementApi.Models.Entities;
+using LoanManagementApi.Models.Enums;
 using LoanManagementApi.RequestModel;
 using LoanManagementApi.ResponseModel;
 
@@ -62,11 +63,21 @@ namespace LoanManagementApi.Implementations.Services
                     Status = false
                 };
             }
+            if (!Enum.TryParse<RepaymentType>(request.RepaymentType, true, out _))
+            {
+                return new GetLoanTypeResponseModel
+                {
+                    Message = "Repayment type not available",
+                    Status = false
+                };
+            }
+
             var loanType = new LoanType
             {
                 Name = request.Name,
                 MaxAmount = request.MaxAmount,
-                MaxDurationInMonths = request.MaxDurationInMonths
+                MaxDurationInMonths = request.MaxDurationInMonths,
+                RepaymentType = request.RepaymentType.ToLower() == RepaymentType.Flexible.ToString().ToLower() ? RepaymentType.Flexible : RepaymentType.Fixed
             };
 
             await _loanTypeRepository.AddAsync(loanType);
@@ -78,7 +89,8 @@ namespace LoanManagementApi.Implementations.Services
                     Id = loanType.Id,
                     Name = loanType.Name,
                     MaxAmount = loanType.MaxAmount,
-                    MaxDurationInMonths = loanType.MaxDurationInMonths
+                    MaxDurationInMonths = loanType.MaxDurationInMonths,
+                    
                 },
                 Message = "Loan type created successfully",
                 Status = true
