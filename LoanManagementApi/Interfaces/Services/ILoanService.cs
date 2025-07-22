@@ -8,6 +8,8 @@ namespace LoanManagementApi.Interfaces.Services
         Task<BaseResponse> ApplyAsync(LoanRequestModel model);
         Task<BaseResponse> ApproveAsync(string loanId);
         Task<BaseResponse> RejectAsync(string loanId);
-        Task<BaseResponse> UpdateCreditScoreOnRepayment(string loanId, bool isDefaulted);
+        Task<LoansResponseModel> GetDefaultedLoans();
+        Task<LoansResponseModel> GetPaidLoans();
+        Task<LoansResponseModel> GetOutstandingLoans();
     }
 }

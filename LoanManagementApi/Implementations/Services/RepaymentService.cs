@@ -37,8 +37,8 @@ namespace LoanManagementApi.Implementations.Services
                     Message = "Schedule already exist",
                     Status = false
                 };
-            decimal monthlyInterestRate = loan.InterestRate / 100m / 12m;
-            decimal monthlyPayment = loan.PrincipalAmount * (monthlyInterestRate / (1 - (decimal)Math.Pow(1 + (double)monthlyInterestRate, -durationInMonths)));
+            decimal totalamount = loan.TotalAmountToRepay;
+            decimal monthlyPayment = totalamount / loan.DurationInMonths;
             var repayment = new Repayment
             {
                 Id = Guid.NewGuid().ToString(),
@@ -99,9 +99,9 @@ namespace LoanManagementApi.Implementations.Services
 
             return schedule;
         }
-        public async Task<BaseResponse> MakePaymentAsync(string loanId, decimal amount)
+        public async Task<BaseResponse> MakePaymentAsync(MakeRepaymentRequestModel model)
         {
-            var loan = await _loanRepository.GetByIdAsync(loanId);
+            var loan = await _loanRepository.GetByIdAsync(model.loanId);
             if (loan == null || loan.Repayment == null)
                 return new BaseResponse { Message = "Loan not found or no repayment scheduled", Status = false };
 
@@ -110,9 +110,9 @@ namespace LoanManagementApi.Implementations.Services
             if (loan.RepaymentType == RepaymentType.Flexible)
             {
                 var schedule = repayment.RepaymentSchedules.First();
-                schedule.AmountPaid += amount;
+                schedule.AmountPaid += model.Amount;
                 var amountLeft = schedule.Amount - schedule.AmountPaid;
-                if (amountLeft<amount)
+                if (model.Amount > amountLeft)
                 {
                     return new BaseResponse
                     {
@@ -120,13 +120,14 @@ namespace LoanManagementApi.Implementations.Services
                         Status = false
                     };
                 }
-                repayment.AmountPaid += amount;
+                repayment.AmountPaid += model.Amount;
+                loan.TotalPaid += model.Amount;
                 if (schedule.AmountPaid == schedule.Amount)
                     schedule.Status = PaymentStatus.Paid;
 
                 if (repayment.AmountPaid == repayment.TotalAmount)
                     repayment.Status = PaymentStatus.Paid;
-
+                await _loanRepository.UpdateAsync(loan);
                 await _repaymentScheduleRepository.UpdateAsync(schedule);
                 await _repaymentRepository.UpdateAsync(repayment);
             }
@@ -139,7 +140,7 @@ namespace LoanManagementApi.Implementations.Services
                 if (nextSchedule == null)
                     return new BaseResponse { Message = "All schedules already paid", Status = false };
                 ApplyPenalty(nextSchedule);
-                if (amount < nextSchedule.Amount)
+                if (model.Amount < nextSchedule.Amount)
                     return new BaseResponse { Message = "Payment amount is less than expected installment", Status = false };
                 
                 nextSchedule.Status = PaymentStatus.Paid;
