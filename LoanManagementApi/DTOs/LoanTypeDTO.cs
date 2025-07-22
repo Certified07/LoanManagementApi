@@ -1,12 +1,10 @@
 ﻿namespace LoanManagementApi.DTOs
 {
-    public class LoanDurationDTO
+    public class LoanTypeDTO
     {
-        public string Id { get; set; }
-
-        public decimal MinAmount { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
         public decimal MaxAmount { get; set; }
-
         public int MaxDurationInMonths { get; set; }
     }
 }

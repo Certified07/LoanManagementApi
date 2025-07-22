@@ -26,10 +26,8 @@ builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<IRepaymentRepository, RepaymentRepository>();
 builder.Services.AddScoped<IRepaymentScheduleRepository, RepaymentScheduleRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ILoanDurationRuleRepository, LoanDurationRuleRepository>();
 
 //add services
-builder.Services.AddScoped<ILoanDurationRuleService, LoanDurationRuleService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddScoped<IRepaymentService, RepaymentService>();
 

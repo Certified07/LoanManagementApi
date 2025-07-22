@@ -18,5 +18,9 @@ namespace LoanManagementApi.Models.Entities
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public Repayment Repayment { get; set; }
+        public int LoanTypeId { get; set; }
+        public LoanType LoanType { get; set; }
+        public RepaymentScheduleType RepaymentSchedule { get; set; }
+
     }
 }
