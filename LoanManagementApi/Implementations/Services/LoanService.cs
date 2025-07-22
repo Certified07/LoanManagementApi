@@ -31,21 +31,16 @@ namespace LoanManagementApi.Implementations.Services
                     Status = false
                 };
 
-            if (client.CreditScore < 500 || client.Income < model.Amount / 2)
-                return new BaseResponse
-                {
-                    Message = "Client does not meet the credit score or income requirements",
-                    Status = false
-                };
+            
             var existingLoans = await _loanRepository.GetByClientIdAsync(model.ClientId);
-            if (existingLoans.Any(l => l.Status == LoanStatus.Pending || l.Status == LoanStatus.Approved))
-            {
+            var amountLoaned = existingLoans.Sum(x => x.PrincipalAmount);
+            var maximumLoan = ((client.CreditScore / 1000) * (client.Income)) - amountLoaned;
+            if (maximumLoan < model.Amount)
                 return new BaseResponse
                 {
-                    Message = "Client has an active or pending loan",
+                    Message = $"The maximum amount you can loan is {maximumLoan}",
                     Status = false
                 };
-            }
             var durationRule = await _loanDurationRuleRepository.FindByAmountAsync(model.Amount);
             if (durationRule == null)
                 return new BaseResponse

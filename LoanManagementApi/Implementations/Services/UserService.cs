@@ -4,8 +4,6 @@ using LoanManagementApi.Models.Entities;
 using LoanManagementApi.Models.Enums;
 using LoanManagementApi.RequestModel;
 using LoanManagementApi.ResponseModel;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -28,7 +26,7 @@ namespace LoanManagementApi.Implementations.Services
         }
         public async Task<BaseResponse> RegisterAsync(RegisterUserRequestModel model)
         {
-            var userNameCheck = await _userRepository.GetByUsernameAsync(model.Username);
+            var userNameCheck = await _userRepository.GetByUsernameAsync(model.Name);
             var emailCheck = await _userRepository.GetByEmailAsync(model.Email);
             if (userNameCheck != null)
             {
@@ -55,10 +53,18 @@ namespace LoanManagementApi.Implementations.Services
                     Status = false
                 };
             }
+            if (model.Income < 10000)
+            {
+                return new BaseResponse
+                {
+                    Message = "You must have a minimum income of 10,000",
+                    Status = false
+                };
+            }
             var user = new MyUser
             {
                 Id = Guid.NewGuid().ToString(),
-                UserName = model.Username,
+                UserName = model.Name,
                 Email = model.Email,
                 PasswordHash = HashPassword(model.Password),
                 Role = UserRole.Client
@@ -66,9 +72,9 @@ namespace LoanManagementApi.Implementations.Services
             var client = new Client
             {
                 Id = Guid.NewGuid().ToString(),
-                Name = model.Username,
+                Name = model.Name,
                 Email = model.Email,
-                Phone = model.Phone,
+                Phone = model.PhoneNumber,
                 CreditScore = 50,
                 Income = model.Income
             };
