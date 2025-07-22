@@ -12,14 +12,12 @@ namespace LoanManagementApi.Implementations.Services
     {
         private readonly ILoanRepository _loanRepository;
         private readonly IRepaymentRepository _repaymentRepository;
-        private readonly ILoanDurationRuleRepository _loanDurationRuleRepository;
         private readonly IRepaymentScheduleRepository _repaymentScheduleRepository;
 
-        public RepaymentService(ILoanRepository loanRepository, IRepaymentRepository repaymentRepository, ILoanDurationRuleRepository loanDurationRuleRepository, IRepaymentScheduleRepository repaymentScheduleRepository)
+        public RepaymentService(ILoanRepository loanRepository, IRepaymentRepository repaymentRepository,  IRepaymentScheduleRepository repaymentScheduleRepository)
         {
             _loanRepository = loanRepository;
             _repaymentRepository = repaymentRepository;
-            _loanDurationRuleRepository = loanDurationRuleRepository;
             _repaymentScheduleRepository = repaymentScheduleRepository;
         }
         public async Task<BaseResponse> GenerateRepaymentScheduleAsync(string loanId, int durationInMonths)

@@ -1,8 +1,8 @@
 ﻿namespace LoanManagementApi.RequestModel
 {
-    public class CreateRuleRequestModel
+    public class LoanTypeRequestModel
     {
-        public decimal MinAmount { get; set; }
+        public string Name { get; set; }
         public decimal MaxAmount { get; set; }
         public int MaxDurationInMonths { get; set; }
     }

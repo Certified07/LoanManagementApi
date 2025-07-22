@@ -15,8 +15,8 @@ public class MyContext : IdentityDbContext<MyUser>
     public DbSet<Client> Clients { get; set; }
     public DbSet<Loan> Loans { get; set; }
     public DbSet<Repayment> Repayments { get; set; }
+    public DbSet<LoanType> LoanTypes { get; set; }
     public DbSet<RepaymentSchedule> RepaymentSchedules { get; set; }
-    public DbSet<LoanDurationRule> LoanDurationRules { get; set; }
     public DbSet<MyUser> MyUsers { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {

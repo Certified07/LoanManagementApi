@@ -10,16 +10,16 @@ namespace LoanManagementApi.Implementations.Services
 {
     public class LoanService : ILoanService
     {
-        private readonly ILoanDurationRuleRepository _loanDurationRuleRepository;
         private readonly ILoanRepository _loanRepository;
         private readonly IClientRepository _clientRepository;
         private readonly IRepaymentService _repaymentService;
-        public LoanService(ILoanDurationRuleRepository loanDurationRuleRepository, ILoanRepository loanRepository, IClientRepository clientRepository, IRepaymentService repaymentService)
+        private readonly ILoanTypeRepository _loanTypeRepository;
+        public LoanService(ILoanRepository loanRepository, IClientRepository clientRepository, IRepaymentService repaymentService,ILoanTypeRepository loanTypeRepository)
         {
-            _loanDurationRuleRepository = loanDurationRuleRepository;
             _loanRepository = loanRepository;
             _clientRepository = clientRepository;
             _repaymentService = repaymentService;
+            _loanTypeRepository = loanTypeRepository;
         }
         public async Task<BaseResponse> ApplyAsync(LoanRequestModel model)
         {
@@ -30,24 +30,21 @@ namespace LoanManagementApi.Implementations.Services
                     Message = "Client not found",
                     Status = false
                 };
-
+            var loantype = await _loanTypeRepository.GetByIdAsync(model.LoanId);
             
             var existingLoans = await _loanRepository.GetByClientIdAsync(model.ClientId);
             var amountLoaned = existingLoans.Sum(x => x.PrincipalAmount);
             var maximumLoan = ((client.CreditScore / 1000) * (client.Income)) - amountLoaned;
-            if (maximumLoan < model.Amount)
+            var allowedAmount = Math.Min(maximumLoan, loantype.MaxAmount);
+
+            if (model.Amount > allowedAmount)
+            {
                 return new BaseResponse
                 {
-                    Message = $"The maximum amount you can loan is {maximumLoan}",
+                    Message = $"The maximum amount you can loan is {allowedAmount}",
                     Status = false
                 };
-            var durationRule = await _loanDurationRuleRepository.FindByAmountAsync(model.Amount);
-            if (durationRule == null)
-                return new BaseResponse
-                {
-                    Message = "You can't loan this amount",
-                    Status = false
-                };
+            }
 
             var loan = new Loan
             {
