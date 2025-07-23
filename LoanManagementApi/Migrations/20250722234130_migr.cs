@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LoanManagementApi.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class migr : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -85,7 +85,8 @@ namespace LoanManagementApi.Migrations
                     Phone = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreditScore = table.Column<int>(type: "int", nullable: false),
-                    Income = table.Column<decimal>(type: "decimal(65,30)", nullable: false)
+                    Income = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    DateOfBirth = table.Column<DateOnly>(type: "date", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -102,7 +103,8 @@ namespace LoanManagementApi.Migrations
                     Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     MaxAmount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    MaxDurationInMonths = table.Column<int>(type: "int", nullable: false)
+                    MaxDurationInMonths = table.Column<int>(type: "int", nullable: false),
+                    RepaymentType = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -252,10 +254,10 @@ namespace LoanManagementApi.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     ApplicationDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ApprovalDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    LoanTypeId = table.Column<int>(type: "int", nullable: false),
-                    RepaymentSchedule = table.Column<int>(type: "int", nullable: false)
+                    TotalPaid = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    RepaymentType = table.Column<int>(type: "int", nullable: false),
+                    LoanTypeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -283,7 +285,8 @@ namespace LoanManagementApi.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LoanId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Amount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    AmountPaid = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Penalty = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
@@ -334,19 +337,19 @@ namespace LoanManagementApi.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "44e36a50-0091-4f8f-84c6-e932cd9c4df2", null, "Admin", null },
-                    { "91f8dcdf-e48c-4ad2-8153-d6d787f71e74", null, "Client", null }
+                    { "4dfb0f0f-07e0-4896-89c5-32a1670ebabb", null, "Admin", null },
+                    { "a8dd1d07-47de-4648-9850-308ec1dfa987", null, "Client", null }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "82b5947e-b56d-4662-90a7-39cdcd542e18", 0, "83095f9f-6647-4746-9499-cccf144d8125", "admin@gmail.com", true, false, null, "ADMIN@GMAIL.COM", null, "c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec", null, false, 0, "08c220f0-91a7-45a5-83f2-bd7386783787", false, "Admin" });
+                values: new object[] { "d50e6838-029a-4aeb-880b-27a06ca2ab00", 0, "8926f10d-9a3c-47e2-b78a-a0ae80a8ad0a", "admin@gmail.com", true, false, null, "ADMIN@GMAIL.COM", null, "c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec", null, false, 0, "cbc9b627-dd40-4758-8180-22e6e6d2fdc3", false, "Admin" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "44e36a50-0091-4f8f-84c6-e932cd9c4df2", "82b5947e-b56d-4662-90a7-39cdcd542e18" });
+                values: new object[] { "4dfb0f0f-07e0-4896-89c5-32a1670ebabb", "d50e6838-029a-4aeb-880b-27a06ca2ab00" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

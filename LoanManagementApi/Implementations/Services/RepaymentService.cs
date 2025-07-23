@@ -5,6 +5,7 @@ using LoanManagementApi.Models.Entities;
 using LoanManagementApi.Models.Enums;
 using LoanManagementApi.RequestModel;
 using LoanManagementApi.ResponseModel;
+using System.Security.Claims;
 
 namespace LoanManagementApi.Implementations.Services
 {
@@ -13,12 +14,14 @@ namespace LoanManagementApi.Implementations.Services
         private readonly ILoanRepository _loanRepository;
         private readonly IRepaymentRepository _repaymentRepository;
         private readonly IRepaymentScheduleRepository _repaymentScheduleRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor; 
 
-        public RepaymentService(ILoanRepository loanRepository, IRepaymentRepository repaymentRepository,  IRepaymentScheduleRepository repaymentScheduleRepository)
+        public RepaymentService(ILoanRepository loanRepository, IRepaymentRepository repaymentRepository,  IRepaymentScheduleRepository repaymentScheduleRepository,IHttpContextAccessor httpContextAccessor)
         {
             _loanRepository = loanRepository;
             _repaymentRepository = repaymentRepository;
             _repaymentScheduleRepository = repaymentScheduleRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<BaseResponse> GenerateFixedRepaymentScheduleAsync(string loanId, int durationInMonths)
         {
@@ -101,25 +104,36 @@ namespace LoanManagementApi.Implementations.Services
         }
         public async Task<BaseResponse> MakePaymentAsync(MakeRepaymentRequestModel model)
         {
+            var user = _httpContextAccessor.HttpContext?.User;
+            var userId = user?.FindFirst(ClaimTypes.Name)?.Value;
+            var userEmail = user?.FindFirst(ClaimTypes.Email)?.Value;
             var loan = await _loanRepository.GetByIdAsync(model.loanId);
             if (loan == null || loan.Repayment == null)
                 return new BaseResponse { Message = "Loan not found or no repayment scheduled", Status = false };
-
+            if (loan.Client.Email != userEmail)
+            {
+                return new BaseResponse
+                {
+                    Message = "This loan is not for the current logged in user",
+                    Status = false
+                };
+            }
             var repayment = loan.Repayment;
 
             if (loan.RepaymentType == RepaymentType.Flexible)
             {
                 var schedule = repayment.RepaymentSchedules.First();
-                schedule.AmountPaid += model.Amount;
+                
                 var amountLeft = schedule.Amount - schedule.AmountPaid;
                 if (model.Amount > amountLeft)
                 {
                     return new BaseResponse
                     {
-                        Message = $"You just have {amountLeft} to pay",
+                        Message = $"You just have {(int)amountLeft} to pay",
                         Status = false
                     };
                 }
+                schedule.AmountPaid += model.Amount;
                 repayment.AmountPaid += model.Amount;
                 loan.TotalPaid += model.Amount;
                 if (schedule.AmountPaid == schedule.Amount)

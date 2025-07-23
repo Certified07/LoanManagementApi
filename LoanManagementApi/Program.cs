@@ -39,6 +39,7 @@ builder.Services.AddAuthentication(options =>
 // Add Authorization
 builder.Services.AddAuthorization();
 
+builder.Services.AddHttpContextAccessor();
 // Database configuration
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<MyContext>(options =>
@@ -59,6 +60,7 @@ builder.Services.AddScoped<IRepaymentService, RepaymentService>();
 builder.Services.AddScoped<ILoanTypeService, LoanTypeService>();
 builder.Services.AddScoped<ILoanStatusTrackingService, LoanStatusTrackingService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IClientService, ClientService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
