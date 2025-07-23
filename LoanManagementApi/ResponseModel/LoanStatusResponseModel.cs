@@ -5,8 +5,6 @@
         public string LoanId { get; set; }
         public string ClientId { get; set; }
         public string LoanStatus { get; set; }
-        public int MissedPayments { get; set; }
-        public DateTime? LastPaymentDate { get; set; }
-        public decimal TotalOutstanding { get; set; }
+        public int TotalPayment { get; set; }
     }
 }

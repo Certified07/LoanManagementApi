@@ -20,7 +20,7 @@ namespace LoanManagementApi.Implementations.Repositories
             return user;
         }
 
-        public async Task<MyUser> GetByIdAsync(Guid id)
+        public async Task<MyUser> GetByIdAsync(string id)
         {
             return await _context.Users.FindAsync(id);
         }
@@ -49,7 +49,7 @@ namespace LoanManagementApi.Implementations.Repositories
             return existingUser;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(string id)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)

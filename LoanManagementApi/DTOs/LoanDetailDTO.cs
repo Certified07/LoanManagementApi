@@ -8,5 +8,6 @@
         public decimal InterestRate { get; set; }
         public DateTime? AprovalDate { get; set; }
         public string Status { get; set; }
+        public int CreditScore {  get; set; }
     }
 }

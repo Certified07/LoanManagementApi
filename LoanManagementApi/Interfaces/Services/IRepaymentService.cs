@@ -6,12 +6,12 @@ namespace LoanManagementApi.Interfaces.Services
 {
     public interface IRepaymentService
     {
-        Task<BaseResponse> GenerateFixedRepaymentScheduleAsync(string loanId, int durationInMonths);
+        Task GenerateFixedRepaymentScheduleAsync(string loanId, int durationInMonths);
         Task<RepaymentScheduleResponseModel> GetRepaymentSummaryAsync(string loanId);
 
         Task<BaseResponse> MakePaymentAsync(MakeRepaymentRequestModel model);
         Task<List<RepaymentResponseModel>> GetHistoryByLoanIdAsync(string loanId);
-        Task<RepaymentSchedule> GenerateFlexibleRepaymentSchedule(Loan loan);
+        Task GenerateFlexibleRepaymentSchedule(Loan loan);
 
     }
 }

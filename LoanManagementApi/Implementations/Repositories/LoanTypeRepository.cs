@@ -22,7 +22,7 @@ namespace LoanManagementApi.Implementations.Repositories
         }
         public async Task<LoanType?> GetByNameAsync(string name)
         {
-            return await _context.LoanTypes.FirstOrDefaultAsync(l => l.Name == name);
+            return await _context.LoanTypes.FirstOrDefaultAsync(l => l.Name.ToLower() == name.ToLower());
         }
 
         public async Task AddAsync(LoanType loanType)

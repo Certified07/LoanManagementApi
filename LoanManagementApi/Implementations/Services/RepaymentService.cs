@@ -1,4 +1,5 @@
 ﻿using LoanManagementApi.DTOs;
+using LoanManagementApi.Implementations.Repositories;
 using LoanManagementApi.Interfaces.Repositories;
 using LoanManagementApi.Interfaces.Services;
 using LoanManagementApi.Models.Entities;
@@ -15,31 +16,18 @@ namespace LoanManagementApi.Implementations.Services
         private readonly IRepaymentRepository _repaymentRepository;
         private readonly IRepaymentScheduleRepository _repaymentScheduleRepository;
         private readonly IHttpContextAccessor _httpContextAccessor; 
-
-        public RepaymentService(ILoanRepository loanRepository, IRepaymentRepository repaymentRepository,  IRepaymentScheduleRepository repaymentScheduleRepository,IHttpContextAccessor httpContextAccessor)
+        private readonly IClientRepository _clientRepository;
+        public RepaymentService(ILoanRepository loanRepository, IRepaymentRepository repaymentRepository,  IRepaymentScheduleRepository repaymentScheduleRepository,IHttpContextAccessor httpContextAccessor,IClientRepository clientRepository)
         {
             _loanRepository = loanRepository;
             _repaymentRepository = repaymentRepository;
             _repaymentScheduleRepository = repaymentScheduleRepository;
             _httpContextAccessor = httpContextAccessor;
+            _clientRepository = clientRepository;
         }
-        public async Task<BaseResponse> GenerateFixedRepaymentScheduleAsync(string loanId, int durationInMonths)
+        public async Task GenerateFixedRepaymentScheduleAsync(string loanId, int durationInMonths)
         {
             var loan = await _loanRepository.GetByIdAsync(loanId);
-            if (loan == null)
-            {
-                return new BaseResponse
-                {
-                    Message = "Loan not found",
-                    Status = false
-                };
-            }
-            if (loan.Repayment != null && loan.Repayment.RepaymentSchedules.Count != 0)
-                return new BaseResponse
-                {
-                    Message = "Schedule already exist",
-                    Status = false
-                };
             decimal totalamount = loan.TotalAmountToRepay;
             decimal monthlyPayment = totalamount / loan.DurationInMonths;
             var repayment = new Repayment
@@ -68,14 +56,9 @@ namespace LoanManagementApi.Implementations.Services
             }
             repayment.RepaymentSchedules = schedules;
             await _repaymentRepository.CreateAsync(repayment);
-            return new BaseResponse
-            {
-                Message = "Repayment schedule generated successfully",
-                Status = true
-            };
 
         }
-        public async Task<RepaymentSchedule> GenerateFlexibleRepaymentSchedule(Loan loan)
+        public async Task GenerateFlexibleRepaymentSchedule(Loan loan)
         {
             var repayment = new Repayment
             {
@@ -100,12 +83,11 @@ namespace LoanManagementApi.Implementations.Services
 
             await _repaymentScheduleRepository.CreateAsync(schedule);
 
-            return schedule;
         }
         public async Task<BaseResponse> MakePaymentAsync(MakeRepaymentRequestModel model)
         {
             var user = _httpContextAccessor.HttpContext?.User;
-            var userId = user?.FindFirst(ClaimTypes.Name)?.Value;
+            var userId = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userEmail = user?.FindFirst(ClaimTypes.Email)?.Value;
             var loan = await _loanRepository.GetByIdAsync(model.loanId);
             if (loan == null || loan.Repayment == null)
@@ -141,6 +123,11 @@ namespace LoanManagementApi.Implementations.Services
 
                 if (repayment.AmountPaid == repayment.TotalAmount)
                     repayment.Status = PaymentStatus.Paid;
+                if (loan.TotalPaid == loan.TotalAmountToRepay)
+                {
+                    loan.Status = LoanStatus.Paid;
+                }
+                await UpdateClientCreditScoreAsync(loan.Id);
                 await _loanRepository.UpdateAsync(loan);
                 await _repaymentScheduleRepository.UpdateAsync(schedule);
                 await _repaymentRepository.UpdateAsync(repayment);
@@ -156,7 +143,9 @@ namespace LoanManagementApi.Implementations.Services
                 ApplyPenalty(nextSchedule);
                 if (model.Amount < nextSchedule.Amount)
                     return new BaseResponse { Message = "Payment amount is less than expected installment", Status = false };
-                
+                if (model.Amount > nextSchedule.Amount)
+                    return new BaseResponse { Message = $"Amount paid is greated than expected amount. The expected amount is {(int)nextSchedule.Amount}", Status = false };
+
                 nextSchedule.Status = PaymentStatus.Paid;
                 nextSchedule.AmountPaid = nextSchedule.Amount;
                 repayment.AmountPaid += nextSchedule.Amount;
@@ -219,6 +208,27 @@ namespace LoanManagementApi.Implementations.Services
             };
 
         }
+        public async Task UpdateClientCreditScoreAsync(string loanId)
+        {
+            var loan = await _loanRepository.GetByIdAsync(loanId);
+            if (loan == null) return;
+
+            var client = await _clientRepository.GetByIdAsync(loan.ClientId);
+            if (client == null) return;
+
+            if (loan.Status == LoanStatus.Paid &&(DateTime.Now > loan.ApprovalDate.Value.AddMonths(loan.DurationInMonths)))
+            {
+                client.CreditScore -= 30;
+                loan.Status = LoanStatus.Defaulted;
+            }
+            else if (loan.Status == LoanStatus.Paid && DateTime.Now <= loan.ApprovalDate.Value.AddMonths(loan.DurationInMonths))
+            {
+                client.CreditScore += 5;
+            }
+            client.CreditScore = Math.Max(0, Math.Min(100, client.CreditScore));
+            await _loanRepository.UpdateAsync(loan);
+            await _clientRepository.UpdateAsync(client);
+        }
         public async Task<List<RepaymentResponseModel>> GetHistoryByLoanIdAsync(string loanId)
         {
             var repayments = await _repaymentRepository.GetHistoryByLoanIdAsync(loanId);
@@ -259,4 +269,5 @@ namespace LoanManagementApi.Implementations.Services
         }
 
     }
+
 }

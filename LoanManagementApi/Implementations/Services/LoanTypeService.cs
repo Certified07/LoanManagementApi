@@ -71,7 +71,14 @@ namespace LoanManagementApi.Implementations.Services
                     Status = false
                 };
             }
-
+            if (request.MaxDurationInMonths <= 0)
+            {
+                return new GetLoanTypeResponseModel
+                {
+                    Message = "You can't create a loan type for duration less than a month",
+                    Status = false
+                };
+            }
             var loanType = new LoanType
             {
                 Name = request.Name,
