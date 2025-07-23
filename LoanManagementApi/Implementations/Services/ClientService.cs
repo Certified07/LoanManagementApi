@@ -30,6 +30,7 @@ namespace LoanManagementApi.Implementations.Services
                 FullName = x.Name,
                 Email = x.Email,
                 PhoneNumber = x.Phone,
+                CreditScore = x.CreditScore,
                 TotalLoans = allLoans.Count(l => l.ClientId == x.Id),
                 TotalLoanAmount = allLoans
                     .Where(l => l.ClientId == x.Id)
@@ -61,6 +62,7 @@ namespace LoanManagementApi.Implementations.Services
                     TotalAmountToRepay = l.TotalAmountToRepay,
                     InterestRate = l.InterestRate,
                     AprovalDate = l.ApprovalDate,
+                    CreditScore = l.Client.CreditScore,
                     Status = l.Status.ToString()
                 }).ToList();
             }

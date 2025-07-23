@@ -177,38 +177,6 @@ namespace LoanManagementApi.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                if (id <= 0)
-                {
-                    return BadRequest(new
-                    {
-                        Message = "Invalid loan type ID",
-                        Status = false
-                    });
-                }
-
-                var result = await _loanTypeService.DeleteAsync(id);
-
-                if (result.Status)
-                {
-                    return Ok(result);
-                }
-
-                return BadRequest(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    Message = "An error occurred while deleting the loan type",
-                    Status = false,
-                    Error = ex.Message
-                });
-            }
-        }
+        
     }
 }

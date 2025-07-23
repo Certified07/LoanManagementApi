@@ -95,7 +95,7 @@ namespace LoanManagementApi.Implementations.Services
             {
                 return new LoginResponseModel
                 {
-                    Message = "User not found",
+                    Message = "Invalid email or password",
                     Status = false
                 };
             }
@@ -103,7 +103,7 @@ namespace LoanManagementApi.Implementations.Services
             {
                 return new LoginResponseModel
                 {
-                    Message = "Invalid password",
+                    Message = "Invalid email or password",
                     Status = false
                 };
             }
@@ -119,7 +119,7 @@ namespace LoanManagementApi.Implementations.Services
         {
             var claims = new[]
             {
-            new Claim(ClaimTypes.Name, user.Id),
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };

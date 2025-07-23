@@ -1,4 +1,5 @@
-﻿using LoanManagementApi.Interfaces.Services;
+﻿using LoanManagementApi.Implementations.Services;
+using LoanManagementApi.Interfaces.Services;
 using LoanManagementApi.RequestModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +11,12 @@ namespace LoanManagementApi.Controllers
     public class LoanController : ControllerBase
     {
         private readonly ILoanService _loanService;
+        private readonly ILoanStatusTrackingService _loanStatusTrackingService;
 
-        public LoanController(ILoanService loanService)
+        public LoanController(ILoanService loanService, ILoanStatusTrackingService loanStatusTrackingService)
         {
             _loanService = loanService;
+            _loanStatusTrackingService = loanStatusTrackingService;
         }
 
         [HttpPost]
@@ -48,6 +51,30 @@ namespace LoanManagementApi.Controllers
         {
             var result = await _loanService.RejectAsync(loanId);
             return result.Status ? Ok(result) : BadRequest(result);
+        }
+        [HttpGet("{loanId}")]
+        public async Task<IActionResult> GetLoanStatus(string loanId)
+        {
+            if (string.IsNullOrWhiteSpace(loanId))
+            {
+                return BadRequest(new { Message = "Loan ID is required", Status = false });
+            }
+
+            try
+            {
+                var result = await _loanStatusTrackingService.GetLoanStatusAsync(loanId);
+
+                if (!result.Status)
+                {
+                    return NotFound(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "An error occurred while retrieving loan status", Status = false });
+            }
         }
 
         [HttpGet("defaults")]

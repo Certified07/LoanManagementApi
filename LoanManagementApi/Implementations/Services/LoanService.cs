@@ -6,6 +6,7 @@ using LoanManagementApi.Models.Entities;
 using LoanManagementApi.Models.Enums;
 using LoanManagementApi.RequestModel;
 using LoanManagementApi.ResponseModel;
+using System.Security.Claims;
 
 namespace LoanManagementApi.Implementations.Services
 {
@@ -14,17 +15,25 @@ namespace LoanManagementApi.Implementations.Services
         private readonly ILoanRepository _loanRepository;
         private readonly IClientRepository _clientRepository;
         private readonly IRepaymentService _repaymentService;
+        private readonly IUserRepository _userRepository;
+        private readonly IHttpContextAccessor _contextAccessor;
         private readonly ILoanTypeRepository _loanTypeRepository;
-        public LoanService(ILoanRepository loanRepository, IClientRepository clientRepository, IRepaymentService repaymentService,ILoanTypeRepository loanTypeRepository)
+        public LoanService(ILoanRepository loanRepository, IClientRepository clientRepository, IRepaymentService repaymentService, IUserRepository userRepository, IHttpContextAccessor contextAccessor, ILoanTypeRepository loanTypeRepository)
         {
             _loanRepository = loanRepository;
             _clientRepository = clientRepository;
             _repaymentService = repaymentService;
+            _userRepository = userRepository;
+            _contextAccessor = contextAccessor;
             _loanTypeRepository = loanTypeRepository;
         }
+
         public async Task<BaseResponse> ApplyAsync(LoanRequestModel model)
         {
-            var client = await _clientRepository.GetByIdAsync(model.ClientId);
+            var user = _contextAccessor.HttpContext?.User;
+            var userId = user?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userDetails = await _userRepository.GetByIdAsync(userId);
+            var client =await _clientRepository.GetByEmailAsync(userDetails.Email);
             if (client == null)
                 return new BaseResponse
                 {
@@ -32,8 +41,8 @@ namespace LoanManagementApi.Implementations.Services
                     Status = false
                 };
             var loantype = await _loanTypeRepository.GetByNameAsync(model.LoanType);
-            
-            var existingLoans = await _loanRepository.GetByClientIdAsync(model.ClientId);
+
+            var existingLoans = await _loanRepository.GetByClientIdAsync(client.Id);
             var amountLoaned = existingLoans.Sum(x => x.PrincipalAmount);
             var maximumLoan = ((client.CreditScore / 100.0M) * client.Income) - amountLoaned;
 
@@ -43,18 +52,33 @@ namespace LoanManagementApi.Implementations.Services
             {
                 return new BaseResponse
                 {
-                    Message = $"The maximum amount you can loan is {allowedAmount}",
+                    Message = $"The maximum amount you can loan is {(int)allowedAmount}",
                     Status = false
                 };
             }
-
+            if (model.DurationInMonths > loantype.MaxDurationInMonths)
+            {
+                return new BaseResponse
+                {
+                    Message = $"You can only borrow the loan for {loantype.MaxDurationInMonths} months",
+                    Status = false
+                };
+            }
+            if (model.DurationInMonths <= 0)
+            {
+                return new BaseResponse
+                {
+                    Message = "You can't borrow for less than a month",
+                    Status = false
+                };
+            }
             var loan = new Loan
             {
                 Id = Guid.NewGuid().ToString(),
                 PrincipalAmount = model.Amount,
                 InterestRate = 5M,
                 TotalAmountToRepay = model.Amount + (model.Amount * 5M / 100),
-                ClientId = model.ClientId,
+                ClientId = client.Id,
                 Status = LoanStatus.Pending,
                 ApplicationDate = DateTime.Now,
                 DurationInMonths = model.DurationInMonths,
@@ -137,7 +161,7 @@ namespace LoanManagementApi.Implementations.Services
         public async Task<LoansResponseModel> GetDefaultedLoans()
         {
             var response = await _loanRepository.GetDefaultsAsync();
-            if(response.Count() == 0)
+            if (response.Count() == 0)
             {
                 return new LoansResponseModel
                 {
@@ -215,5 +239,8 @@ namespace LoanManagementApi.Implementations.Services
                 Status = true
             };
         }
+
+        
+
     }
 }

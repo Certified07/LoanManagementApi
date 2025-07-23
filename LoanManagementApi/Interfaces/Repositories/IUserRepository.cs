@@ -6,9 +6,9 @@ namespace LoanManagementApi.Interfaces.Repositories
     {
         Task<MyUser> GetByEmailAsync(string email);
         Task<MyUser> CreateAsync(MyUser user);
-        Task<MyUser> GetByIdAsync(Guid id);
+        Task<MyUser> GetByIdAsync(string id);
         Task<MyUser> GetByUsernameAsync(string username);
         Task<MyUser> UpdateAsync(MyUser user);
-        Task<bool> DeleteAsync(Guid id);
+        Task<bool> DeleteAsync(string id);
     }
 }
