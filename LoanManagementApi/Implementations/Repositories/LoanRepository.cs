@@ -25,8 +25,10 @@ namespace LoanManagementApi.Implementations.Repositories
         {
             return await _context.Loans.Include(x => x.Repayment)
                                            .ThenInclude(x => x.RepaymentSchedules)
+                                           .Include(x => x.Client)
                                            .FirstOrDefaultAsync(x => x.Id == id);
         }
+
 
         public async Task<List<Loan>> GetAllAsync()
         {

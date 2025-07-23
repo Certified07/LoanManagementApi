@@ -1,7 +1,6 @@
-﻿
-using LoanManagementApi.Implementations.Services;
-using LoanManagementApi.Interfaces.Services;
-using LoanManagementApi.ResponseModel;
+﻿using LoanManagementApi.Interfaces.Services;
+using LoanManagementApi.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LoanManagementApi.Controllers
@@ -17,40 +16,29 @@ namespace LoanManagementApi.Controllers
             _repaymentService = repaymentService;
         }
 
-   
-        [HttpGet("schedule/{loanId}")]
-        public async Task<ActionResult<RepaymentScheduleResponseModel>> GetRepaymentSchedule(string loanId)
+        [HttpPost("pay")]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> MakeRepayment([FromBody] MakeRepaymentRequestModel request)
         {
-            var result = await _repaymentService.GetRepaymentSummaryAsync(loanId);
-
-            if (result == null)
-            {
-                return NotFound(new BaseResponse
-                {
-                    Message = "No repayment schedule found for the specified loan",
-                    Status = false
-                });
-            }
-
-            return Ok(result);
+            var result = await _repaymentService.MakePaymentAsync(request);
+            return result.Status ? Ok(result) : BadRequest(result);
         }
 
+        [HttpGet("schedule/{loanId}")]
+        [Authorize]
+        public async Task<IActionResult> GetRepaymentSchedule(string loanId)
+        {
+            var result = await _repaymentService.GetRepaymentSummaryAsync(loanId);
+            return result == null ? NotFound(new { Message = "No repayment schedule found", Status = false }) : Ok(result);
+        }
 
         [HttpGet("history/{loanId}")]
-        public async Task<ActionResult<List<RepaymentResponseModel>>> GetRepaymentHistory(string loanId)
+        [Authorize]
+        public async Task<IActionResult> GetRepaymentHistory(string loanId)
         {
-            var repayments = await _repaymentService.GetHistoryByLoanIdAsync(loanId);
-
-            if (repayments == null || !repayments.Any())
-            {
-                return NotFound(new BaseResponse
-                {
-                    Message = "No repayment history found for the specified loan",
-                    Status = false
-                });
-            }
-
-            return Ok(repayments);
+            var result = await _repaymentService.GetHistoryByLoanIdAsync(loanId);
+            return result == null || !result.Any() ? NotFound(new { Message = "No repayment history found", Status = false }) : Ok(result);
         }
     }
 }
+

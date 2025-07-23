@@ -198,9 +198,9 @@ namespace LoanManagementApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "db8c9dec-50e1-4905-90c4-2b519dfa11c0",
+                            Id = "d50e6838-029a-4aeb-880b-27a06ca2ab00",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "26b26a44-cdea-4ae3-beba-0cc853481acc",
+                            ConcurrencyStamp = "8926f10d-9a3c-47e2-b78a-a0ae80a8ad0a",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -208,7 +208,7 @@ namespace LoanManagementApi.Migrations
                             PasswordHash = "c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec",
                             PhoneNumberConfirmed = false,
                             Role = 0,
-                            SecurityStamp = "ebf0ada2-9313-4a53-821c-c29ea7998e7b",
+                            SecurityStamp = "cbc9b627-dd40-4758-8180-22e6e6d2fdc3",
                             TwoFactorEnabled = false,
                             UserName = "Admin"
                         });
@@ -314,12 +314,12 @@ namespace LoanManagementApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "ec392658-5c6a-4335-853a-8c79c42d3bc5",
+                            Id = "4dfb0f0f-07e0-4896-89c5-32a1670ebabb",
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = "70a047c8-32ae-4e24-bf21-433e17b9248c",
+                            Id = "a8dd1d07-47de-4648-9850-308ec1dfa987",
                             Name = "Client"
                         });
                 });
@@ -413,8 +413,8 @@ namespace LoanManagementApi.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "db8c9dec-50e1-4905-90c4-2b519dfa11c0",
-                            RoleId = "ec392658-5c6a-4335-853a-8c79c42d3bc5"
+                            UserId = "d50e6838-029a-4aeb-880b-27a06ca2ab00",
+                            RoleId = "4dfb0f0f-07e0-4896-89c5-32a1670ebabb"
                         });
                 });
 

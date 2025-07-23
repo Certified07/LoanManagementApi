@@ -31,7 +31,7 @@ namespace LoanManagementApi.Implementations.Services
                     Message = "Client not found",
                     Status = false
                 };
-            var loantype = await _loanTypeRepository.GetByIdAsync(model.LoanId);
+            var loantype = await _loanTypeRepository.GetByNameAsync(model.LoanType);
             
             var existingLoans = await _loanRepository.GetByClientIdAsync(model.ClientId);
             var amountLoaned = existingLoans.Sum(x => x.PrincipalAmount);
@@ -58,7 +58,7 @@ namespace LoanManagementApi.Implementations.Services
                 Status = LoanStatus.Pending,
                 ApplicationDate = DateTime.Now,
                 DurationInMonths = model.DurationInMonths,
-                LoanTypeId = model.LoanId,
+                LoanTypeId = loantype.Id,
                 IsCompleted = false,
                 RepaymentType = loantype.RepaymentType
             };

@@ -10,6 +10,7 @@ namespace LoanManagementApi.Interfaces.Services
         Task<RepaymentScheduleResponseModel> GetRepaymentSummaryAsync(string loanId);
 
         Task<BaseResponse> MakePaymentAsync(MakeRepaymentRequestModel model);
+        Task<List<RepaymentResponseModel>> GetHistoryByLoanIdAsync(string loanId);
         Task<RepaymentSchedule> GenerateFlexibleRepaymentSchedule(Loan loan);
 
     }

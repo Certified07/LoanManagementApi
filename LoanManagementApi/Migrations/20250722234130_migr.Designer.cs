@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LoanManagementApi.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20250722154207_InitialCreat")]
-    partial class InitialCreat
+    [Migration("20250722234130_migr")]
+    partial class migr
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -201,9 +201,9 @@ namespace LoanManagementApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "acdfbe5d-7396-44be-bb98-58a9c2d3358c",
+                            Id = "d50e6838-029a-4aeb-880b-27a06ca2ab00",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "51fc49a5-3407-4b2a-97e9-b965d6a5e618",
+                            ConcurrencyStamp = "8926f10d-9a3c-47e2-b78a-a0ae80a8ad0a",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -211,7 +211,7 @@ namespace LoanManagementApi.Migrations
                             PasswordHash = "c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec",
                             PhoneNumberConfirmed = false,
                             Role = 0,
-                            SecurityStamp = "acc7d811-c5b0-4244-a3ca-6a5bb0acdd3a",
+                            SecurityStamp = "cbc9b627-dd40-4758-8180-22e6e6d2fdc3",
                             TwoFactorEnabled = false,
                             UserName = "Admin"
                         });
@@ -317,12 +317,12 @@ namespace LoanManagementApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "fe8ed3c0-af33-49ba-8833-63b228870023",
+                            Id = "4dfb0f0f-07e0-4896-89c5-32a1670ebabb",
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = "e66c636a-fac3-4129-8db4-1a5fdf885271",
+                            Id = "a8dd1d07-47de-4648-9850-308ec1dfa987",
                             Name = "Client"
                         });
                 });
@@ -416,8 +416,8 @@ namespace LoanManagementApi.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "acdfbe5d-7396-44be-bb98-58a9c2d3358c",
-                            RoleId = "fe8ed3c0-af33-49ba-8833-63b228870023"
+                            UserId = "d50e6838-029a-4aeb-880b-27a06ca2ab00",
+                            RoleId = "4dfb0f0f-07e0-4896-89c5-32a1670ebabb"
                         });
                 });
 
