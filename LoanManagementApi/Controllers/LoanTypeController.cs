@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LoanManagementApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
+    [Route("api/loan-types")]
     public class LoanTypeController : ControllerBase
     {
         private readonly ILoanTypeService _loanTypeService;
@@ -18,6 +17,7 @@ namespace LoanManagementApi.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Client")]
         public async Task<IActionResult> GetAll()
         {
             try
@@ -43,6 +43,7 @@ namespace LoanManagementApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,Client")]
         public async Task<IActionResult> GetById(int id)
         {
             try
@@ -86,6 +87,7 @@ namespace LoanManagementApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] LoanTypeRequestModel model)
         {
             try
@@ -123,6 +125,7 @@ namespace LoanManagementApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] LoanTypeRequestModel model)
         {
             try

@@ -73,28 +73,6 @@ namespace LoanManagementApi.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Clients",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Email = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Phone = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreditScore = table.Column<int>(type: "int", nullable: false),
-                    Income = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    DateOfBirth = table.Column<DateOnly>(type: "date", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Clients", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "LoanTypes",
                 columns: table => new
                 {
@@ -102,7 +80,7 @@ namespace LoanManagementApi.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    MaxAmount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    MaxAmount = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
                     MaxDurationInMonths = table.Column<int>(type: "int", nullable: false),
                     RepaymentType = table.Column<int>(type: "int", nullable: false)
                 },
@@ -240,6 +218,36 @@ namespace LoanManagementApi.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Clients",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserId = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Email = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Phone = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreditScore = table.Column<int>(type: "int", nullable: false),
+                    Income = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
+                    DateOfBirth = table.Column<DateOnly>(type: "date", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clients", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Clients_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Loans",
                 columns: table => new
                 {
@@ -247,14 +255,14 @@ namespace LoanManagementApi.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ClientId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    PrincipalAmount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    InterestRate = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    TotalAmountToRepay = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    PrincipalAmount = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
+                    InterestRate = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
+                    TotalAmountToRepay = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
                     DurationInMonths = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     ApplicationDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ApprovalDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    TotalPaid = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    TotalPaid = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
                     IsCompleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     RepaymentType = table.Column<int>(type: "int", nullable: false),
                     LoanTypeId = table.Column<int>(type: "int", nullable: false)
@@ -285,11 +293,11 @@ namespace LoanManagementApi.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LoanId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TotalAmount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    AmountPaid = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
+                    AmountPaid = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    Penalty = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    Penalty = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
@@ -313,9 +321,9 @@ namespace LoanManagementApi.Migrations
                     RepaymentId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DueDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    AmountPaid = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
-                    Penalty = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
+                    AmountPaid = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
+                    Penalty = table.Column<decimal>(type: "decimal(22,2)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     LastPenaltyCalculationDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
@@ -337,19 +345,19 @@ namespace LoanManagementApi.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "4dfb0f0f-07e0-4896-89c5-32a1670ebabb", null, "Admin", null },
-                    { "a8dd1d07-47de-4648-9850-308ec1dfa987", null, "Client", null }
+                    { "0e25e596-36f7-430e-819c-d0000756fe81", null, "Client", null },
+                    { "6231368c-35db-448e-9c05-7590beb30632", null, "Admin", null }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "d50e6838-029a-4aeb-880b-27a06ca2ab00", 0, "8926f10d-9a3c-47e2-b78a-a0ae80a8ad0a", "admin@gmail.com", true, false, null, "ADMIN@GMAIL.COM", null, "c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec", null, false, 0, "cbc9b627-dd40-4758-8180-22e6e6d2fdc3", false, "Admin" });
+                values: new object[] { "c792bc9b-0b6b-431c-97cc-582215d91ce5", 0, "ee59f63b-21ec-4abe-83d8-4f2f69de973f", "admin@gmail.com", true, false, null, "ADMIN@GMAIL.COM", null, "c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec", null, false, 0, "0fed70bc-f4a2-4869-a57c-99f8f4916fae", false, "Admin" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "4dfb0f0f-07e0-4896-89c5-32a1670ebabb", "d50e6838-029a-4aeb-880b-27a06ca2ab00" });
+                values: new object[] { "6231368c-35db-448e-9c05-7590beb30632", "c792bc9b-0b6b-431c-97cc-582215d91ce5" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -387,6 +395,11 @@ namespace LoanManagementApi.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Clients_UserId",
+                table: "Clients",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Loans_ClientId",
@@ -435,9 +448,6 @@ namespace LoanManagementApi.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "Repayments");
 
             migrationBuilder.DropTable(
@@ -448,6 +458,9 @@ namespace LoanManagementApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "LoanTypes");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }

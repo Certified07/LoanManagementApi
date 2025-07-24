@@ -123,9 +123,11 @@ namespace LoanManagementApi.Implementations.Services
 
                 if (repayment.AmountPaid == repayment.TotalAmount)
                     repayment.Status = PaymentStatus.Paid;
+               
                 if (loan.TotalPaid == loan.TotalAmountToRepay)
                 {
                     loan.Status = LoanStatus.Paid;
+                    await _loanRepository.UpdateAsync(loan);
                 }
                 await UpdateClientCreditScoreAsync(loan.Id);
                 await _loanRepository.UpdateAsync(loan);
@@ -140,22 +142,35 @@ namespace LoanManagementApi.Implementations.Services
 
                 if (nextSchedule == null)
                     return new BaseResponse { Message = "All schedules already paid", Status = false };
-                ApplyPenalty(nextSchedule);
+
+
                 if (model.Amount < nextSchedule.Amount)
                     return new BaseResponse { Message = "Payment amount is less than expected installment", Status = false };
+
                 if (model.Amount > nextSchedule.Amount)
-                    return new BaseResponse { Message = $"Amount paid is greated than expected amount. The expected amount is {(int)nextSchedule.Amount}", Status = false };
+                    return new BaseResponse { Message = $"Amount paid is greater than expected amount. The expected amount is {(int)nextSchedule.Amount}", Status = false };
 
                 nextSchedule.Status = PaymentStatus.Paid;
                 nextSchedule.AmountPaid = nextSchedule.Amount;
+
                 repayment.AmountPaid += nextSchedule.Amount;
+                loan.TotalPaid += nextSchedule.Amount;
 
                 if (repayment.AmountPaid >= repayment.TotalAmount)
                     repayment.Status = PaymentStatus.Paid;
 
+                if (loan.TotalPaid >= loan.TotalAmountToRepay)
+                {
+                    loan.Status = LoanStatus.Paid;
+                    await UpdateClientCreditScoreAsync(loan.Id);
+                }
+
+                await _loanRepository.UpdateAsync(loan);
                 await _repaymentScheduleRepository.UpdateAsync(nextSchedule);
                 await _repaymentRepository.UpdateAsync(repayment);
             }
+
+
 
             return new BaseResponse
             {
@@ -164,26 +179,12 @@ namespace LoanManagementApi.Implementations.Services
             };
         }
 
-        private void ApplyPenalty(RepaymentSchedule schedule)
-        {
-            if (schedule.IsPaid || schedule.DueDate >= DateTime.UtcNow.Date)
-                return;
-            var lastDate = schedule.LastPenaltyCalculationDate?.Date ?? schedule.DueDate.Date;
-            var today = DateTime.UtcNow.Date;
-
-            int overdueDays = (today - lastDate).Days;
-            if (overdueDays <= 0) return;
-            decimal penaltyToAdd = schedule.Amount * 0.05M * overdueDays;
-            schedule.Penalty += decimal.Round(penaltyToAdd, 2);
-            schedule.LastPenaltyCalculationDate = today;
-        }
         public async Task<RepaymentScheduleResponseModel> GetRepaymentSummaryAsync(string loanId)
         {
             var repayment = await _repaymentRepository.GetByLoanId(loanId);
             if (repayment == null) return null;
             foreach (var item in repayment.RepaymentSchedules)
             {
-                ApplyPenalty(item);
                 await _repaymentScheduleRepository.UpdateAsync(item);
             }
             var totalAmount = repayment.RepaymentSchedules.Sum(s => s.Amount);
@@ -242,7 +243,6 @@ namespace LoanManagementApi.Implementations.Services
             {
                 foreach (var schedule in repayment.RepaymentSchedules)
                 {
-                    ApplyPenalty(schedule);
                     await _repaymentScheduleRepository.UpdateAsync(schedule);
                 }
             }

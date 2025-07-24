@@ -6,6 +6,7 @@ using LoanManagementApi.Models.Entities;
 using LoanManagementApi.Models.Enums;
 using LoanManagementApi.RequestModel;
 using LoanManagementApi.ResponseModel;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace LoanManagementApi.Implementations.Services
@@ -28,20 +29,27 @@ namespace LoanManagementApi.Implementations.Services
             _loanTypeRepository = loanTypeRepository;
         }
 
-        public async Task<BaseResponse> ApplyAsync(LoanRequestModel model)
+        public async Task<ApplyLoanResponseModel> ApplyAsync(LoanRequestModel model)
         {
             var user = _contextAccessor.HttpContext?.User;
             var userId = user?.FindFirstValue(ClaimTypes.NameIdentifier);
             var userDetails = await _userRepository.GetByIdAsync(userId);
             var client =await _clientRepository.GetByEmailAsync(userDetails.Email);
             if (client == null)
-                return new BaseResponse
+                return new ApplyLoanResponseModel
                 {
                     Message = "Client not found",
                     Status = false
                 };
             var loantype = await _loanTypeRepository.GetByNameAsync(model.LoanType);
-
+            if (loantype == null)
+            {
+                return new ApplyLoanResponseModel
+                {
+                    Message = "We don't have this loan type for now. Try again later",
+                    Status = false
+                };
+            }
             var existingLoans = await _loanRepository.GetByClientIdAsync(client.Id);
             var amountLoaned = existingLoans.Sum(x => x.PrincipalAmount);
             var maximumLoan = ((client.CreditScore / 100.0M) * client.Income) - amountLoaned;
@@ -50,7 +58,7 @@ namespace LoanManagementApi.Implementations.Services
 
             if (model.Amount > allowedAmount)
             {
-                return new BaseResponse
+                return new ApplyLoanResponseModel
                 {
                     Message = $"The maximum amount you can loan is {(int)allowedAmount}",
                     Status = false
@@ -58,7 +66,7 @@ namespace LoanManagementApi.Implementations.Services
             }
             if (model.DurationInMonths > loantype.MaxDurationInMonths)
             {
-                return new BaseResponse
+                return new ApplyLoanResponseModel
                 {
                     Message = $"You can only borrow the loan for {loantype.MaxDurationInMonths} months",
                     Status = false
@@ -66,7 +74,7 @@ namespace LoanManagementApi.Implementations.Services
             }
             if (model.DurationInMonths <= 0)
             {
-                return new BaseResponse
+                return new ApplyLoanResponseModel
                 {
                     Message = "You can't borrow for less than a month",
                     Status = false
@@ -89,8 +97,9 @@ namespace LoanManagementApi.Implementations.Services
 
 
             await _loanRepository.CreateAsync(loan);
-            return new BaseResponse
+            return new ApplyLoanResponseModel
             {
+                LoanId = loan.Id,
                 Message = "Loan application submitted successfully",
                 Status = true
             };
@@ -239,8 +248,46 @@ namespace LoanManagementApi.Implementations.Services
                 Status = true
             };
         }
+        public async Task<GeneralLoanResponseModel> GetLoanDetailsForCurrentUser()
+        {
+            var user = _contextAccessor.HttpContext?.User;
+            var userId = user?.FindFirstValue(ClaimTypes.NameIdentifier);
+            string role = user?.FindFirstValue(ClaimTypes.Role);
+            var loans = await _loanRepository.GetAllAsync();
 
-        
+            if (role != "Admin")
+            {
+                loans = loans.Where(l => l.Client.UserId == userId).ToList();
+            }
+
+            var result = loans.Select(l => new GeneralLoanDTO
+            {
+                LoanId = l.Id,
+                Username = l.Client.User.UserName,
+                Status = l.Status.ToString(),
+                Schedules = l.Repayment?.RepaymentSchedules?.Select(s => new RepaymentScheduleDTO
+                {
+                    Id = s.Id,
+                    RepaymentId = s.Id,
+                    Amount = s.Amount,
+                    DueDate = s.DueDate.ToString("yyyy-MM-dd"),
+                    AmountPaid = s.AmountPaid,
+                    Penalty = s.Penalty,
+                    Status = s.Status.ToString(),
+
+                }).ToList() ?? new List<RepaymentScheduleDTO>()
+
+            }).ToList();
+
+            return new GeneralLoanResponseModel
+            {
+                Data = result,
+                Message = "Sucessfully returned",
+                Status = true
+            };
+        }
+
+
 
     }
 }

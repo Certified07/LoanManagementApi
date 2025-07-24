@@ -76,12 +76,13 @@ namespace LoanManagementApi.Implementations.Services
                 Id = Guid.NewGuid().ToString(),
                 Name = model.Name,
                 Email = model.Email,
+                UserId = user.Id,
                 Phone = model.PhoneNumber,
                 CreditScore = 50,
                 Income = model.Income
             };
-            await _clientRepository.CreateAsync(client);
             await _userRepository.CreateAsync(user);
+            await _clientRepository.CreateAsync(client);
             return new BaseResponse
             {
                 Message = "Client successfully registered",

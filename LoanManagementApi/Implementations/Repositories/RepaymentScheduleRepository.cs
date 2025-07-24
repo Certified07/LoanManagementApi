@@ -56,6 +56,12 @@ namespace LoanManagementApi.Implementations.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<List<RepaymentSchedule>> GetOverdueSchedulesAsync()
+        {
+            return await _context.RepaymentSchedules
+                .Where(s => !s.IsPaid && s.DueDate < DateTime.UtcNow.Date.AddDays(3))
+                .ToListAsync();
+        }
     }
 
 }

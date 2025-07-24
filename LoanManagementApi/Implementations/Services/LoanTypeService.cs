@@ -63,6 +63,14 @@ namespace LoanManagementApi.Implementations.Services
                     Status = false
                 };
             }
+            if (request.MaxAmount < 0)
+            {
+                return new GetLoanTypeResponseModel
+                {
+                    Message = "Invalid amount",
+                    Status = false
+                };
+            }
             if (!Enum.TryParse<RepaymentType>(request.RepaymentType, true, out _))
             {
                 return new GetLoanTypeResponseModel
