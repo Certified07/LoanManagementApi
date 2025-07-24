@@ -1,4 +1,5 @@
 ﻿using LoanManagementApi.Models.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LoanManagementApi.Models.Entities
 {
@@ -7,6 +8,7 @@ namespace LoanManagementApi.Models.Entities
         public int Id { get; set; }
 
         public string Name { get; set; } = string.Empty;
+        [Column(TypeName = "decimal(22,2)")]
 
         public decimal MaxAmount { get; set; }
 

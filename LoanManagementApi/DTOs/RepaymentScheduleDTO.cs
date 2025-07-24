@@ -2,6 +2,8 @@
 {
     public class RepaymentScheduleDTO
     {
+        public string Id { get; set; }
+        public string RepaymentId {  get; set; }
         public string ScheduleId { get; set; }
         public string DueDate { get; set; }
         public decimal Amount { get; set; }

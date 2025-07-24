@@ -3,6 +3,7 @@ using LoanManagementApi.Interfaces.Services;
 using LoanManagementApi.RequestModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LoanManagementApi.Controllers
 {
@@ -12,11 +13,13 @@ namespace LoanManagementApi.Controllers
     {
         private readonly ILoanService _loanService;
         private readonly ILoanStatusTrackingService _loanStatusTrackingService;
+        private readonly IRepaymentService _repaymentService;
 
-        public LoanController(ILoanService loanService, ILoanStatusTrackingService loanStatusTrackingService)
+        public LoanController(ILoanService loanService, ILoanStatusTrackingService loanStatusTrackingService, IRepaymentService repaymentService)
         {
             _loanService = loanService;
             _loanStatusTrackingService = loanStatusTrackingService;
+            _repaymentService = repaymentService;
         }
 
         [HttpPost]
@@ -77,16 +80,32 @@ namespace LoanManagementApi.Controllers
             }
         }
 
-        [HttpGet("defaults")]
+        [HttpGet("status")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetDefaultedLoans() => Ok(await _loanService.GetDefaultedLoans());
+        public async Task<IActionResult> GetLoansByStatus([FromQuery] string status)
+        {
+            var response = await _loanService.GetLoanDetailsForCurrentUser();
+            var result = response.Data.Where(x => x.Status == status).ToList();
+            if (result == null)
+                return BadRequest("Invalid loan status.");
 
-        [HttpGet("paid")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetPaidLoans() => Ok(await _loanService.GetPaidLoans());
+            return Ok(result);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetLoanDetails()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var role = User.FindFirstValue(ClaimTypes.Role);
 
-        [HttpGet("outstanding")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetOutstandingLoans() => Ok(await _loanService.GetOutstandingLoans());
+            var loans = await _loanService.GetLoanDetailsForCurrentUser();
+            return Ok(loans);
+        }
+        [HttpPost("payment")]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> MakeRepayment([FromBody] MakeRepaymentRequestModel request)
+        {
+            var result = await _repaymentService.MakePaymentAsync(request);
+            return result.Status ? Ok(result) : BadRequest(result);
+        }
     }
 }

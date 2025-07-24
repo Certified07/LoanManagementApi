@@ -8,5 +8,6 @@ namespace LoanManagementApi.Interfaces.Repositories
         Task<RepaymentSchedule> UpdateAsync(RepaymentSchedule schedule);
         Task<RepaymentSchedule?> GetByIdAsync(string repaymentScheduleId);
         Task<bool> DeleteAsync(string id);
+        Task<List<RepaymentSchedule>> GetOverdueSchedulesAsync();
     }
 }

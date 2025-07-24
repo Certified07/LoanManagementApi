@@ -13,9 +13,12 @@ namespace LoanManagementApi.Models.Entities
 
         public DateTime DueDate { get; set; }
 
-        public decimal Amount { get; set; } 
+        [Column(TypeName = "decimal(22,2)")]
+        public decimal Amount { get; set; }
 
+        [Column(TypeName = "decimal(22,2)")]
         public decimal AmountPaid { get; set; } = 0;
+        [Column(TypeName = "decimal(22,2)")]
 
         public decimal Penalty { get; set; } = 0;
 

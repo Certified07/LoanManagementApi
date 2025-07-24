@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LoanManagementApi.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20250722234130_migr")]
+    [Migration("20250724111606_migr")]
     partial class migr
     {
         /// <inheritdoc />
@@ -40,7 +40,7 @@ namespace LoanManagementApi.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<decimal>("Income")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -50,7 +50,13 @@ namespace LoanManagementApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Clients");
                 });
@@ -74,7 +80,7 @@ namespace LoanManagementApi.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("InterestRate")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("tinyint(1)");
@@ -83,7 +89,7 @@ namespace LoanManagementApi.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("PrincipalAmount")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.Property<int>("RepaymentType")
                         .HasColumnType("int");
@@ -92,10 +98,10 @@ namespace LoanManagementApi.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalAmountToRepay")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.Property<decimal>("TotalPaid")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.HasKey("Id");
 
@@ -115,7 +121,7 @@ namespace LoanManagementApi.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("MaxAmount")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.Property<int>("MaxDurationInMonths")
                         .HasColumnType("int");
@@ -201,9 +207,9 @@ namespace LoanManagementApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "d50e6838-029a-4aeb-880b-27a06ca2ab00",
+                            Id = "c792bc9b-0b6b-431c-97cc-582215d91ce5",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "8926f10d-9a3c-47e2-b78a-a0ae80a8ad0a",
+                            ConcurrencyStamp = "ee59f63b-21ec-4abe-83d8-4f2f69de973f",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -211,7 +217,7 @@ namespace LoanManagementApi.Migrations
                             PasswordHash = "c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec",
                             PhoneNumberConfirmed = false,
                             Role = 0,
-                            SecurityStamp = "cbc9b627-dd40-4758-8180-22e6e6d2fdc3",
+                            SecurityStamp = "0fed70bc-f4a2-4869-a57c-99f8f4916fae",
                             TwoFactorEnabled = false,
                             UserName = "Admin"
                         });
@@ -223,7 +229,7 @@ namespace LoanManagementApi.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<decimal>("AmountPaid")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
@@ -236,13 +242,13 @@ namespace LoanManagementApi.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("Penalty")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.HasKey("Id");
 
@@ -258,10 +264,10 @@ namespace LoanManagementApi.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.Property<decimal>("AmountPaid")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime(6)");
@@ -273,7 +279,7 @@ namespace LoanManagementApi.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("Penalty")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(22,2)");
 
                     b.Property<string>("RepaymentId")
                         .IsRequired()
@@ -317,12 +323,12 @@ namespace LoanManagementApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "4dfb0f0f-07e0-4896-89c5-32a1670ebabb",
+                            Id = "6231368c-35db-448e-9c05-7590beb30632",
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = "a8dd1d07-47de-4648-9850-308ec1dfa987",
+                            Id = "0e25e596-36f7-430e-819c-d0000756fe81",
                             Name = "Client"
                         });
                 });
@@ -416,8 +422,8 @@ namespace LoanManagementApi.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "d50e6838-029a-4aeb-880b-27a06ca2ab00",
-                            RoleId = "4dfb0f0f-07e0-4896-89c5-32a1670ebabb"
+                            UserId = "c792bc9b-0b6b-431c-97cc-582215d91ce5",
+                            RoleId = "6231368c-35db-448e-9c05-7590beb30632"
                         });
                 });
 
@@ -438,6 +444,17 @@ namespace LoanManagementApi.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("LoanManagementApi.Models.Entities.Client", b =>
+                {
+                    b.HasOne("LoanManagementApi.Models.Entities.MyUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("LoanManagementApi.Models.Entities.Loan", b =>
